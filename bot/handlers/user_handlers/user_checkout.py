@@ -1,0 +1,450 @@
+from aiogram import Router, F
+from aiogram.types import CallbackQuery, Message
+from aiogram.fsm.context import FSMContext
+
+from database.crud import get_or_create_user_profile, get_cart, create_order, create_user_profile
+
+from bot.states.user_states.order_states import OrderStates
+
+from bot.keyboards.user.user_checkout_keyboards import checkout_edit_keyboard, payment_methods_keyboard, delivery_methods_keyboard, change_address_keyboard, profile_data_confirm_keyboard
+from bot.keyboards.user.order_keyboards import order_details_keyboard
+from bot.keyboards.user.user_common_keyboards import cart_back_menu
+
+from bot.utils.user_utils.user_orders_utils import show_order_summary
+from bot.utils.user_utils.universal_handlers import universal_address_handler, universal_phone_handler, universal_name_handler, universal_exit
+from bot.utils.user_utils.user_common_utils import send_step_and_cleanup, start_manual_checkout
+from bot.utils.common_utils import delete_request_and_user_message
+from bot.utils.user_utils.user_checkout_utils import editing_name, editing_phone, editing_address, editing_delivery, \
+    editing_payment, editing_comment, notify_admin_about_new_order
+
+router = Router()
+
+
+@router.callback_query(lambda c: c.data in ["menu_catalog", "menu_main"])
+async def checkout_exit_handler(callback: CallbackQuery, state: FSMContext):
+    """
+    Хэндлер выхода из процесса оформления заказа по кнопкам "В каталог" и "В главное меню".
+    Вызывает универсальную функцию выхода.
+    """
+    await universal_exit(callback, state)
+
+
+@router.callback_query(F.data == "place_an_order")
+async def place_an_order_handler(callback: CallbackQuery, state: FSMContext):
+    """
+    Запускает процесс оформления заказа. Проверяет корзину.
+    Если профиль есть — предлагает использовать. Если нет — пошаговый ввод.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    user_id = callback.from_user.id
+    user_profile = await get_or_create_user_profile(user_id)
+    cart_items = await get_cart(user_id)
+
+    if not cart_items:
+        await callback.message.answer("Ваша корзина пуста!", reply_markup=cart_back_menu())
+        return
+
+    await state.update_data(cart=[{"product_id": item.product_id, "qty": item.quantity} for item in cart_items])
+
+    fields_to_check = ["full_name", "phone", "address"]
+    if user_profile and all(
+            getattr(user_profile, field) not in ("", None, "-") for field in fields_to_check
+    ):
+        text = (
+            f"В вашем профиле:\n\n"
+            f"ФИО: {user_profile.full_name}\n"
+            f"Телефон: {user_profile.phone}\n"
+            f"Адрес: {user_profile.address}\n\n"
+            "Использовать эти данные для оформления заказа?"
+        )
+        await callback.message.answer(text, reply_markup=profile_data_confirm_keyboard())
+        await state.set_state(OrderStates.use_profile_choice)
+
+    else:
+        await start_manual_checkout(callback, state)
+        await state.set_state(OrderStates.waiting_for_name)
+
+
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.use_profile_choice)
+async def use_profile_choice_handler(callback: CallbackQuery, state: FSMContext):
+    """
+    Обрабатывает выбор пользователя: использовать данные профиля или заполнить заново.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    user_id = callback.from_user.id
+    user_profile = await get_or_create_user_profile(user_id)
+
+    if callback.data == "use_profile":
+        # Вписываем данные профиля в FSM, сразу спрашиваем комментарий
+        await state.update_data(
+            name=user_profile.full_name,
+            phone=user_profile.phone,
+            address=user_profile.address,
+        )
+        comment = await callback.message.answer(
+            "Введите комментарий к заказу (или «-» (без кавычек), чтобы пропустить):",
+            reply_markup=cart_back_menu()
+        )
+        await state.update_data(main_message_id=comment.message_id)
+        await state.set_state(OrderStates.waiting_for_comment)
+
+    elif callback.data == "fill_manually":
+        await start_manual_checkout(callback, state)
+        await state.set_state(OrderStates.waiting_for_name)
+
+    elif callback.data == "cancel_order":
+        await callback.message.answer("Оформление заказа отменено.", reply_markup=cart_back_menu())
+        await state.clear()
+
+    await callback.answer()
+
+
+@router.message(OrderStates.waiting_for_name)
+async def name_handler_order(message: Message, state: FSMContext):
+    """
+    Хэндлер для ввода имени при оформлении заказа.
+    Вызывает универсальный обработчик имени.
+    """
+    await universal_name_handler(message, state)
+
+
+@router.message(OrderStates.editing_name)
+async def edit_name_handler_order(message: Message, state: FSMContext):
+    """
+    Хэндлер для редактирования имени при оформлении заказа.
+    """
+    await editing_name(message, state)
+
+
+@router.message(OrderStates.waiting_for_phone)
+async def phone_handler_order(message: Message, state: FSMContext):
+    """
+    Хэндлер для ввода телефона при оформлении заказа.
+    Вызывает универсальный обработчик телефона.
+    """
+    await universal_phone_handler(message, state)
+
+
+@router.message(OrderStates.editing_phone)
+async def edit_phone_handler_order(message: Message, state: FSMContext):
+    """
+    Хэндлер для редактирования телефона при оформлении заказа.
+    """
+    await editing_phone(message, state)
+
+
+@router.message(OrderStates.waiting_for_comment)
+async def order_comment_handler(message: Message, state: FSMContext):
+    """
+    Сохраняет комментарий пользователя и переводит к выбору способа оплаты.
+    """
+    await delete_request_and_user_message(message, state)
+    await state.update_data(comment=message.text if message.text != '-' else "Без комментария")
+    data = await state.get_data()
+    text = (
+        "Пожалуйста, заполните данные для заказа.\n\n"
+        f"✅ Фамилия и имя: {data.get('name')}\n"
+        f"✅ Телефон: {data.get('phone')}\n"
+        f"✅ Комментарий: {data.get('comment')}\n"
+        f"4️⃣ Выберите способ оплаты:"
+    )
+    await send_step_and_cleanup(message=message, text=text, state=state, reply_markup=payment_methods_keyboard())
+    await state.set_state(OrderStates.choosing_payment)
+
+
+@router.message(OrderStates.editing_comment)
+async def edit_comment_handler_order(message: Message, state: FSMContext):
+    """
+    Хэндлер для редактирования комментария к заказу.
+    """
+    await editing_comment(message, state)
+
+
+@router.callback_query(OrderStates.choosing_payment)
+async def choose_payment_method(callback: CallbackQuery, state: FSMContext):
+    """
+    Обработка выбора способа оплаты пользователем.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    method = {
+        "pay_card": "Картой онлайн",
+        "pay_cash": "Наличные",
+        "pay_yoomoney": "ЮMoney"
+    }[callback.data]
+
+    if not method:
+        await callback.answer("Неизвестный способ оплаты", show_alert=True)
+        return
+
+    if method in ("Картой онлайн", "ЮMoney"):
+        try:
+            await callback.message.answer(
+                text="❗️ Этот способ оплаты скоро появится. Пока выберите другой:",
+                reply_markup=payment_methods_keyboard()
+            )
+        except Exception as e:
+            pass
+        await callback.answer()
+        return
+
+    await state.update_data(payment_method=method)
+    data = await state.get_data()
+    text = (
+        "Пожалуйста, заполните данные для заказа.\n\n"
+        f"✅ Фамилия и имя: {data.get('name')}\n"
+        f"✅ Телефон: {data.get('phone')}\n"
+        f"✅ Комментарий: {data.get('comment')}\n"
+        f"✅ Способ оплаты: {data.get('payment_method')}\n"
+        f"5️⃣ Выберите способ доставки:"
+    )
+
+    await send_step_and_cleanup(
+        message=callback.message,
+        text=text,
+        state=state,
+        reply_markup=delivery_methods_keyboard()
+    )
+    await state.set_state(OrderStates.choosing_delivery)
+
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.editing_payment)
+async def edit_payment_handler_order(callback: CallbackQuery, state: FSMContext):
+    """
+    Хэндлер для редактирования способа оплаты заказа.
+    """
+    await editing_payment(callback, state)
+
+
+@router.callback_query(OrderStates.choosing_delivery)
+async def choose_delivery_method(callback: CallbackQuery, state: FSMContext):
+    """
+    Обрабатывает выбор способа доставки пользователем.
+    """
+
+    method = {
+        "delivery_courier": "Доставка курьером",
+        "delivery_pickup": "Самовывоз"
+    }[callback.data]
+
+    await state.update_data(delivery_method=method)
+    if method == "Доставка курьером":
+        await delete_request_and_user_message(callback.message, state)
+        user_profile = await get_or_create_user_profile(callback.from_user.id)
+        if user_profile.address not in ("", "-", None):
+            msg = await callback.message.answer(
+                f"Текущий адрес из профиля:\n{user_profile.address if user_profile and hasattr(user_profile, 'address') else 'Нет адреса'}\n\n"
+                "Хотите использовать этот адрес для доставки или ввести новый?",
+                reply_markup=change_address_keyboard()
+            )
+            await state.update_data(main_message_id=msg.message_id)
+            await state.set_state(OrderStates.choose_address_option)
+        else:
+            msg = await callback.message.answer("Введите адрес доставки:", reply_markup=cart_back_menu())
+            await state.update_data(main_message_id=msg.message_id)
+            await state.set_state(OrderStates.waiting_for_address)
+
+    else:  # Самовывоз
+        await delete_request_and_user_message(callback.message, state)
+        await state.update_data(address="Не требуется")
+        await show_order_summary(callback, state)
+
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.editing_delivery)
+async def edit_delivery_handler_order(callback: CallbackQuery, state: FSMContext):
+    """
+    Хэндлер для редактирования способа доставки заказа.
+    """
+    await editing_delivery(callback, state)
+
+
+@router.callback_query(OrderStates.choose_address_option)
+async def choose_address_option_handler(callback: CallbackQuery, state: FSMContext):
+    """
+    Обрабатывает выбор адреса: использовать из профиля или ввести новый.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    user_id = callback.from_user.id
+    user_profile = await get_or_create_user_profile(user_id)
+    if callback.data == 'use_profile_address':
+        address = user_profile.address or "Не указан"
+        await state.update_data(address=address)
+        await show_order_summary(callback, state)
+    elif callback.data == 'enter_new_address':
+        msg = await callback.message.answer("Введите адрес доставки:", reply_markup=cart_back_menu())
+        await state.update_data(address=msg.text)
+        await state.update_data(main_message_id=msg.message_id)
+        await state.set_state(OrderStates.waiting_for_address)
+    await callback.answer()
+
+
+@router.message(OrderStates.waiting_for_address)
+async def address_handler_order(message: Message, state: FSMContext):
+    """
+    Обрабатывает ввод адреса при чекауте (асинхронно, с валидацией).
+    """
+    await universal_address_handler(message, state)
+
+
+@router.message(OrderStates.editing_address)
+async def edit_address_handler_order(message: Message, state: FSMContext):
+    """
+    Хэндлер для редактирования адреса доставки заказа.
+    """
+    await editing_address(message, state)
+
+
+@router.callback_query(OrderStates.confirm, F.data == "edit_data")
+async def edit_data_handler(callback: CallbackQuery, state: FSMContext):
+    """
+    Переводит пользователя в режим редактирования данных заказа.
+    Показывает клавиатуру с выбором поля для редактирования.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    edit_msg = await callback.message.answer("Что вы хотите изменить?", reply_markup=checkout_edit_keyboard())
+    await state.update_data(main_message_id=edit_msg.message_id)
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.confirm, F.data == "edit_name")
+async def edit_name_callback(callback: CallbackQuery, state: FSMContext):
+    """
+    Начало редактирования ФИО.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    msg = await callback.message.answer("Введите новые ФИО:", reply_markup=cart_back_menu())
+    await state.update_data(main_message_id=msg.message_id)
+    await state.set_state(OrderStates.editing_name)
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.confirm, F.data == "edit_phone")
+async def edit_phone_callback(callback: CallbackQuery, state: FSMContext):
+    """
+    Начало редактирования номера телефона.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    msg = await callback.message.answer("Введите новый телефон:", reply_markup=cart_back_menu())
+    await state.update_data(main_message_id=msg.message_id)
+    await state.set_state(OrderStates.editing_phone)
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.confirm, F.data == "edit_address")
+async def edit_address_callback(callback: CallbackQuery, state: FSMContext):
+    """
+    Начало редактирования адреса.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    msg = await callback.message.answer("Введите новый адрес:", reply_markup=cart_back_menu())
+    await state.update_data(main_message_id=msg.message_id)
+    await state.set_state(OrderStates.editing_address)
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.confirm, F.data == "edit_comment")
+async def edit_comment_callback(callback: CallbackQuery, state: FSMContext):
+    """
+    Начало редактирования комментария.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    msg = await callback.message.answer("Введите новый комментарий (или напишите 'нет'):",
+                                           reply_markup=cart_back_menu())
+    await state.update_data(main_message_id=msg.message_id)
+    await state.set_state(OrderStates.editing_comment)
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.confirm, F.data == "edit_payment")
+async def edit_payment_callback(callback: CallbackQuery, state: FSMContext):
+    """
+    Начало редактирования метода оплаты.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    msg = await callback.message.answer("Выберите способ оплаты:",
+                                     reply_markup=payment_methods_keyboard())
+    await state.update_data(main_message_id=msg.message_id)
+    await state.set_state(OrderStates.editing_payment)
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.confirm, F.data == "edit_delivery")
+async def edit_delivery_callback(callback: CallbackQuery, state: FSMContext):
+    """
+    Начало редактирования метода доставки.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    msg = await callback.message.answer("Выберите способ доставки:",
+                                           reply_markup=delivery_methods_keyboard())
+    await state.update_data(main_message_id=msg.message_id)
+    await state.set_state(OrderStates.editing_delivery)
+    await callback.answer()
+
+
+@router.callback_query(OrderStates.confirm, F.data == "back_to_confirm")
+async def back_to_summary_callback(callback: CallbackQuery, state: FSMContext):
+    """
+    Возврат к summary заказа.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    await show_order_summary(callback, state)
+    await callback.answer()
+
+
+
+@router.callback_query(OrderStates.confirm, F.data == "confirm_order")
+async def order_confirm_handler(callback: CallbackQuery, state: FSMContext):
+    """
+    Подтверждает оформление заказа, добавляет заказ в базу, очищает корзину и уведомляет пользователя.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    user_id = callback.from_user.id
+    data = await state.get_data()
+    bot = callback.bot
+
+    order = await create_order(user_id=user_id,
+                               name=data.get('name'),
+                               phone=data.get('phone'),
+                               payment_method=data.get('payment_method'),
+                               delivery_method=data.get('delivery_method'),
+                               address=data.get('address'),
+                               comment=data.get('comment')
+                               )
+    await notify_admin_about_new_order(bot, order)
+
+    await create_user_profile(user_id=user_id,
+                              name=data.get('name'),
+                              phone=data.get('phone'),
+                              address=data.get('address')
+                              )
+
+    if not order:
+        await callback.message.answer("Ошибка: корзина пуста!", reply_markup=cart_back_menu())
+        await state.clear()
+        await callback.answer()
+        return
+
+    await callback.message.answer(
+        "Спасибо! Ваш заказ оформлен и передан на обработку ✅",
+        reply_markup=order_details_keyboard()
+    )
+    await state.clear()
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cancel_order")
+async def cancel_order(callback: CallbackQuery, state: FSMContext):
+    """
+    Обрабатывает отмену оформления заказа.
+    Очищает состояние FSM и уведомляет пользователя.
+    """
+    await callback.message.edit_text("Оформление заказа отменено.", reply_markup=cart_back_menu())
+    await state.clear()
+    await callback.answer()
+

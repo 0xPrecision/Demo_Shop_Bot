@@ -1,0 +1,137 @@
+from typing import Dict, Optional
+from decimal import Decimal
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery
+
+from bot.states.user_states.order_states import OrderStates
+from bot.keyboards.user.order_keyboards import order_details_keyboard, order_confirm_keyboard, show_orders_keyboard
+from bot.keyboards.user.user_main_menu import main_menu
+from bot.utils.common_utils import delete_request_and_user_message
+from bot.utils.common_utils import format_price, format_product_name
+from database.crud import get_order_by_id, get_order_items, get_cart, get_orders
+
+
+async def show_orders_menu(callback: CallbackQuery,
+                           state: FSMContext,
+                           msg_text: str,
+                           order_status: Optional[str] = None
+                           ) -> None:
+    """
+    Отображает меню заказов пользователя с фильтром по статусу (если указан).
+
+    :param callback: Объект CallbackQuery пользователя.
+    :param msg_text: Сообщение, если заказов нет.
+    :param order_status: Опционально — фильтр по статусу заказа.
+    """
+    await delete_request_and_user_message(callback.message, state)
+    user_id = callback.from_user.id
+    orders = await get_orders(user_id)
+    if not orders:
+        await callback.message.answer(msg_text, reply_markup=main_menu())
+        return
+
+    text = (f"🧾 Ваши заказы:\n"
+            f"{"-" * 19}\n\n")
+
+    filtered_orders = (
+        [order for order in orders if order.status == order_status]
+        if order_status else orders
+    )
+
+    if not filtered_orders:
+        text += "\nНет заказов с выбранным статусом."
+    else:
+        # Сортировка по дате (свежие выше)
+        filtered_orders = sorted(filtered_orders, key=lambda x: x.created_at, reverse=True)
+        for order in filtered_orders:
+            text += (
+                f"📝 <b>#{order.id}</b> | "
+                f"📅 <i>{order.created_at:%d.%m.%Y}</i> | "
+                f"{order.status} | "
+                f"💰 <b>{format_price(order.total_price)} ₽</b>\n"
+            )
+
+    text += (f"\n\n{"-" * 19}\n"
+             f"<i>Нажмите на заказ, чтобы узнать детали</i>")
+    await callback.message.answer(
+        text,
+        reply_markup=show_orders_keyboard(orders)
+    )
+
+
+async def get_order_details(order_id: int) -> Dict:
+    """
+    Получить подробную информацию о заказе по его идентификатору.
+
+    :param order_id: int — идентификатор заказа.
+    :return: Dict — {"text": описание, "keyboard": инлайн-клавиатура}.
+    """
+    order = await get_order_by_id(order_id)
+    if not order:
+        return {"text": "Заказ не найден.", "keyboard": order_details_keyboard(order_id)}
+
+    order_items = await get_order_items(order)
+    total = sum([item.quantity * float(item.product.price) for item in order_items])
+
+    items_text = "\n".join([
+        f"• {format_product_name(item.product.name)} — {item.quantity} x {format_price(item.product.price)} ₽ = {format_price(item.quantity * float(item.product.price))} ₽"
+        for item in order_items
+    ])
+
+    text = (
+        f"🧾 <b>Заказ #{order.id}</b>\n"
+        f"📅 <b>Дата:</b> {order.created_at:%d.%m.%Y}\n"
+        f"📦 <b>Статус:</b> <b>{order.status}</b>\n"
+        f"💳 <b>Оплата:</b> {order.payment_method or '-'}\n"
+        f"🚚 <b>Доставка:</b> {order.delivery_method or '-'}\n"
+        f"🏠 <b>Адрес:</b> {order.address or '-'}\n"
+        "\n<b>Товары:</b>\n"
+        f"{items_text}\n"
+        f"\n<b>Итого: {format_price(total)} ₽</b>"
+    )
+
+    return {
+        "text": text,
+        "keyboard": order_details_keyboard(order.id)
+    }
+
+
+async def show_order_summary(message_or_callback, state: FSMContext) -> None:
+    """
+    Показывает пользователю итог заказа со всеми введёнными данными (поддерживает Cart ORM и dict).
+    Доступно подтверждение заказа или редактирование данных.
+    """
+    await delete_request_and_user_message(message_or_callback, state)
+    user_id = message_or_callback.from_user.id
+    data = await state.get_data()
+    summary = (
+        f"Проверьте данные заказа:\n\n"
+        f"Имя: {data.get('name', '-')}\n"
+        f"Телефон: {data.get('phone', '-')}\n"
+        f"{data.get('delivery_method', '-')}\n"
+        f"Адрес доставки: {data.get('address', 'Не указан')}\n"
+        f"Комментарий: {data.get('comment', '-')}\n\n"
+        f"Оплата: {data.get('payment_method', '-')}\n\n"
+        f"Ваш заказ:\n"
+    )
+    total = 0
+    cart_items = await get_cart(user_id)
+    for item in cart_items:
+        name = format_product_name(item.product.name)
+        qty = item.quantity
+        price = Decimal(item.product.price)
+        pr_sum = price * qty
+        total += pr_sum
+        summary += f"{name} - x{qty} ({format_price(pr_sum)} ₽)\n"
+
+    summary += (
+        f"\nОбщая сумма заказа: <b>{format_price(total)} ₽</b>"
+        f"\n\nПеред отправкой вы можете изменить любой пункт."
+    )
+
+    if hasattr(message_or_callback, "edit_text"):
+        await message_or_callback.answer(summary, reply_markup=order_confirm_keyboard())
+    else:
+        await message_or_callback.message.answer(summary, reply_markup=order_confirm_keyboard())
+
+    await state.set_state(OrderStates.confirm)
