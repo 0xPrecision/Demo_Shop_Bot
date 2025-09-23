@@ -9,21 +9,21 @@ from database.models import Order
 
 def get_order_short_info(order) -> str:
     """
-    Генерирует короткое описание заказа для отображения в инлайн-клавиатуре.
-    """
+    Generates a short order description for displaying in an inline keyboard.
+	"""
     date = order.created_at.strftime("%d.%m %H:%M")
     return f"{date} | {order.status} | {format_price(order.total_price)} ₽"
 
 
 async def show_orders(callback: CallbackQuery, page: int, text: str):
     """
-    Выводит список заказов с пагинацией и инлайн-клавиатурой.
-
-    :param callback: CallbackQuery — объект события Telegram.
-    :param page: int — номер текущей страницы (от 1).
-    :param text: str — заголовок или текст сообщения.
-    :return: None
-    """
+    Displays the list of orders with pagination and an inline keyboard.
+    
+    :param callback: CallbackQuery — Telegram event object.
+    :param page: int — current page number (from 1).
+    :param text: str — title or message text.
+    :return: None.
+	"""
     orders, has_next, has_prev = await get_orders_page(page)
     orders_for_kb = [
         (order.id, get_order_short_info(order)) for order in orders
@@ -39,14 +39,14 @@ async def show_orders(callback: CallbackQuery, page: int, text: str):
 
 async def admin_show_order_summary(event, state: FSMContext, order: Order, order_id: int):
     """
-    Универсально отправляет администратору подробное описание заказа,
-    включая все позиции, стоимость и данные клиента.
-    :param event: CallbackQuery или Message — объект события Telegram.
-    :param state: FSMContext
-    :param order: Order — объект заказа.
-    :param order_id: int — идентификатор заказа.
-    :return: None
-    """
+    Universally sends the administrator a detailed order description,
+    including all items, total cost, and customer data.
+    :param event: CallbackQuery or Message — Telegram event object.
+    :param state: FSMContext.
+    :param order: Order object.
+    :param order_id: int — order ID.
+    :return: None.
+	"""
     await order.fetch_related('user')
     order_items = await get_order_items(order)
     order_info = (

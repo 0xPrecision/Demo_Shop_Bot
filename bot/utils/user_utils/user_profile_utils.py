@@ -9,16 +9,16 @@ from database.crud import get_or_create_user_profile
 
 async def show_profile_summary(message: Message, state: FSMContext, user_id: int) -> None:
     """
-    Показывает пользователю его профиль с краткой сводкой и клавиатурой подтверждения/редактирования.
-
-    После отображения профиля автоматически переводит FSM в состояние ProfileStates.confirm,
-    чтобы обрабатывать дальнейшие действия (например, изменение данных).
-
-    :param message: Объект aiogram.types Message, куда выводится профиль.
-    :param state: FSMContext пользователя (aiogram), используется для хранения и получения данных, а также смены состояния.
-    :param user_id: int. User ID пользователя
-    :return: None
-    """
+    Displays the user's profile with a short summary and confirmation/edit keyboard.
+    
+    After displaying the profile, automatically sets FSM to ProfileStates.confirm
+    to handle further actions (e.g., editing data).
+    
+    :param message: aiogram.types Message object where the profile is shown.
+    :param state: User's FSMContext (aiogram), used for storing/fetching data and changing state.
+    :param user_id: int. User's ID.
+    :return: None.
+	"""
     await delete_request_and_user_message(message, state)
     user_profile = await get_or_create_user_profile(user_id)
     data = await state.get_data()
@@ -43,7 +43,7 @@ async def editing_name(message: Message, state: FSMContext):
     """
     Обработка ввода нового ФИО в режиме редактирования.
     Проверяет валидность, обновляет профиль, показывает summary.
-    """
+	"""
     user_id = message.from_user.id
     name = message.text
     if not validate_name(name):
@@ -58,7 +58,7 @@ async def editing_phone(message: Message, state: FSMContext):
     """
     Обработка ввода нового телефона в режиме редактирования.
     Проверяет валидность, обновляет профиль, показывает summary.
-    """
+	"""
     user_id = message.from_user.id
     phone = message.text
     if not validate_phone(phone):
@@ -72,7 +72,7 @@ async def editing_address(message: Message, state: FSMContext):
     """
     Обработка ввода нового адреса в режиме редактирования.
     Проверяет валидность, обновляет профиль, показывает summary.
-    """
+	"""
     user_id = message.from_user.id
     address = message.text
     if not validate_address(address):

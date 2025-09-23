@@ -6,13 +6,13 @@ from bot.constants import ORDER_STATUSES
 
 def orders_list_keyboard(orders: List[Tuple[int, str]], page: int = 1, has_next: bool = False, has_prev: bool = False) -> InlineKeyboardMarkup:
     """
-    Клавиатура для списка заказов.
-    :param orders: список (order_id, short_info)
-    :param page: текущая страница
-    :param has_next: есть ли следующая страница
-    :param has_prev: есть ли предыдущая страница
+    Keyboard for the orders list.
+    :param orders: list of (order_id, short_info)
+    :param page: current page
+    :param has_next: whether there is a next page
+    :param has_prev: whether there is a previous page
     :return: InlineKeyboardMarkup
-    """
+	"""
     buttons = [
         [InlineKeyboardButton(text=f"#_id {order_id} | {short_info}", callback_data=f"admin_order_detail:{order_id}")]
         for order_id, short_info in orders
@@ -31,11 +31,11 @@ def orders_list_keyboard(orders: List[Tuple[int, str]], page: int = 1, has_next:
 
 def show_orders_for_search(orders) -> InlineKeyboardMarkup:
     """
-    Создаёт инлайн-клавиатуру для поиска и выбора заказа из списка.
-
-    :param orders: list — список заказов (Order), каждый должен иметь атрибуты id, user.full_name, total_price.
-    :return: InlineKeyboardMarkup — клавиатура для отображения найденных заказов.
-    """
+    Creates an inline keyboard for searching and selecting an order from the list.
+    
+    :param orders: list of orders (Order), each must have attributes id, user.full_name, total_price.
+    :return: InlineKeyboardMarkup — keyboard for displaying found orders.
+	"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(
@@ -47,7 +47,9 @@ def show_orders_for_search(orders) -> InlineKeyboardMarkup:
 
 
 def change_order_status():
-    """Клавиатура для изменения статуса заказа и связи с клиентом."""
+    """
+    Keyboard for changing order status and contacting the customer.
+	"""
     return InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(text="⚡️ Сменить статус", callback_data="change_status")],
@@ -58,11 +60,11 @@ def change_order_status():
 
 def status_keyboard(order_id: int, current_status: str) -> InlineKeyboardMarkup:
     """
-    Клавиатура для смены статуса заказа.
-    :param order_id: ID заказа.
-    :param current_status: Текущий статус заказа.
+    Keyboard for changing the order status.
+    :param order_id: Order ID.
+    :param current_status: Current order status.
     :return: InlineKeyboardMarkup
-    """
+	"""
     buttons = []
     for status_code, status_label in ORDER_STATUSES:
         if status_code == current_status:

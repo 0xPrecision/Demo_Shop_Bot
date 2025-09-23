@@ -8,8 +8,8 @@ router = Router()
 
 async def help_cmd(callback: CallbackQuery, state: FSMContext):
     """
-    Отправляет пользователю справочное сообщение о работе магазина.
-    """
+    Sends the user a help message about the store operation.
+	"""
     await delete_request_and_user_message(callback.message, state)
     await callback.bot.send_message(
         callback.from_user.id,

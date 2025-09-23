@@ -17,12 +17,12 @@ async def show_orders_menu(callback: CallbackQuery,
                            order_status: Optional[str] = None
                            ) -> None:
     """
-    Отображает меню заказов пользователя с фильтром по статусу (если указан).
-
-    :param callback: Объект CallbackQuery пользователя.
-    :param msg_text: Сообщение, если заказов нет.
-    :param order_status: Опционально — фильтр по статусу заказа.
-    """
+    Displays the user's orders menu with optional status filter.
+    
+    :param callback: User's CallbackQuery object.
+    :param msg_text: Message if no orders exist.
+    :param order_status: Optional order status filter.
+	"""
     await delete_request_and_user_message(callback.message, state)
     user_id = callback.from_user.id
     orders = await get_orders(user_id)
@@ -61,11 +61,11 @@ async def show_orders_menu(callback: CallbackQuery,
 
 async def get_order_details(order_id: int) -> Dict:
     """
-    Получить подробную информацию о заказе по его идентификатору.
-
-    :param order_id: int — идентификатор заказа.
-    :return: Dict — {"text": описание, "keyboard": инлайн-клавиатура}.
-    """
+    Get detailed order information by its identifier.
+    
+    :param order_id: int — order ID.
+    :return: Dict — {"text": description, "keyboard": inline keyboard}.
+	"""
     order = await get_order_by_id(order_id)
     if not order:
         return {"text": "Заказ не найден.", "keyboard": order_details_keyboard(order_id)}
@@ -98,9 +98,9 @@ async def get_order_details(order_id: int) -> Dict:
 
 async def show_order_summary(message_or_callback, state: FSMContext) -> None:
     """
-    Показывает пользователю итог заказа со всеми введёнными данными (поддерживает Cart ORM и dict).
-    Доступно подтверждение заказа или редактирование данных.
-    """
+    Displays the order summary to the user with all entered data (supports Cart ORM and dict).
+    Provides options to confirm the order or edit the data.
+	"""
     await delete_request_and_user_message(message_or_callback, state)
     user_id = message_or_callback.from_user.id
     data = await state.get_data()

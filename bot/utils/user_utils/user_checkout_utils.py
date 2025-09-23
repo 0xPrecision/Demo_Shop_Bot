@@ -15,7 +15,7 @@ async def editing_name(message: Message, state: FSMContext):
     """
     Обработка ввода нового ФИО в режиме редактирования.
     Проверяет валидность, показывает summary.
-    """
+	"""
     name = message.text
     if not validate_name(name):
         await validation_process_name(message, state)
@@ -29,7 +29,7 @@ async def editing_phone(message: Message, state: FSMContext):
     """
     Обработка ввода нового телефона в режиме редактирования.
     Проверяет валидность, показывает summary.
-    """
+	"""
     phone = message.text
     if not validate_phone(phone):
         await validation_process_phone(message, state)
@@ -42,7 +42,7 @@ async def editing_address(message: Message, state: FSMContext):
     """
     Обработка ввода нового адреса в режиме редактирования.
     Проверяет валидность, показывает summary.
-    """
+	"""
     address = message.text
     if not validate_address(address):
         await validation_process_address(message, state)
@@ -55,7 +55,7 @@ async def editing_comment(message: Message, state: FSMContext):
     """
     Обработка ввода нового комментария в режиме редактирования.
     Проверяет валидность, показывает summary.
-    """
+	"""
     comment = message.text
     await state.update_data(comment=comment)
     await show_order_summary(message, state)
@@ -65,7 +65,7 @@ async def editing_delivery(callback: CallbackQuery, state: FSMContext):
     """
     Обработка выбора нового метода доставки в режиме редактирования.
     Проверяет валидность, показывает summary.
-    """
+	"""
     method = {
         "delivery_courier": "Доставка курьером",
         "delivery_pickup": "Самовывоз"
@@ -88,7 +88,7 @@ async def editing_payment(callback: CallbackQuery, state: FSMContext):
     """
     Обработка выбора нового метода оплаты в режиме редактирования.
     Проверяет валидность, показывает summary.
-    """
+	"""
     method = {
         "pay_card": "Картой онлайн",
         "pay_cash": "Наличные",
@@ -112,8 +112,8 @@ async def editing_payment(callback: CallbackQuery, state: FSMContext):
 
 async def notify_admin_about_new_order(bot: Bot, order):
     """
-    Отправляет админу уведомление о новом заказе.
-    """
+    Sends an admin notification about a new order.
+	"""
     text = (
         "Сообщение для администратора\n\n"
         f"🛒 <b>Новый заказ #{order.id}</b>\n"

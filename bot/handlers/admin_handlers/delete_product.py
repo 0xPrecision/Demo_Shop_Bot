@@ -15,8 +15,8 @@ router = Router()
 @admin_only
 async def delete_product_confirm(callback: CallbackQuery, state: FSMContext):
     """
-    Подтверждение удаления товара.
-    """
+    Product deletion confirmation.
+	"""
     await delete_request_and_user_message(callback.message, state)
     product_id = int(callback.data.split(":")[1])
     msg = await callback.message.answer("Вы уверены, что хотите удалить этот товар?",
@@ -28,8 +28,8 @@ async def delete_product_confirm(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def delete_product_execute(callback: CallbackQuery):
     """
-    Удаляет товар из базы (или делает неактивным).
-    """
+    Deletes the product from the database (or marks it inactive).
+	"""
     product_id = int(callback.data.split(":")[1])
     await Product.filter(id=product_id).update(is_active=False)
     await callback.message.edit_text("Товар удалён.", reply_markup=admin_main_menu())

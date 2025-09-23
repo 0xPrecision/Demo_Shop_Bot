@@ -7,13 +7,13 @@ from aiogram.types import Message
 
 def paginate(items: List, page: int, page_size: int) -> Tuple[List, int, int]:
     """
-    Универсальная пагинация для любого списка.
-
-    :param items: Список элементов (например, товаров)
-    :param page: Номер текущей страницы (от 0)
-    :param page_size: Количество элементов на страницу
-    :return: (Список элементов на текущей странице, всего страниц, номер текущей страницы)
-    """
+    Generic pagination for any list.
+    
+    :param items: List of elements (e.g., products).
+    :param page: Current page number (from 0).
+    :param page_size: Number of elements per page.
+    :return: (List of elements on the current page, total pages, current page number)
+	"""
     total = len(items)
     total_pages = (total + page_size - 1) // page_size
     start = page * page_size
@@ -23,7 +23,9 @@ def paginate(items: List, page: int, page_size: int) -> Tuple[List, int, int]:
 
 
 def format_product_name(name: str, max_len: int = 20) -> str:
-    """Обрезает название для кнопки, если слишком длинное."""
+    """
+    Truncates the button label if it is too long.
+	"""
     return name if len(name) <= max_len else name[:max_len - 3] + "..."
 
 def format_price(price) -> str:
@@ -36,12 +38,12 @@ async def delete_request_and_user_message(
     data: dict = None
 ) -> None:
     """
-    Удаляет предыдущее предупреждение (main_message_id) и сообщение пользователя.
-
-    :param message: Объект Message пользователя.
+    Deletes the previous warning (main_message_id) and the user's message.
+    
+    :param message: User's Message object.
     :param state: FSMContext.
-    :param data: dict с данными FSM (если не передан — будет получен внутри).
-    """
+    :param data: dict with FSM data (if not provided — will be fetched internally).
+	"""
     if data is None:
         data = await state.get_data()
     main_message_id = data.get('main_message_id')

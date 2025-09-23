@@ -16,8 +16,8 @@ router = Router()
 @admin_only
 async def edit_product_start(callback: CallbackQuery, state: FSMContext):
     """
-    Показывает инлайн-клавиатуру для выбора поля редактирования.
-    """
+    Displays an inline keyboard to choose the field to edit.
+	"""
     await delete_request_and_user_message(callback.message, state)
     product_id = int(callback.data.split(":")[1])
     product = await get_product_by_id(product_id)
@@ -36,8 +36,8 @@ async def edit_product_start(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def choose_edit_field(callback: CallbackQuery, state: FSMContext):
     """
-    Начинает редактирование выбранного поля.
-    """
+    Starts editing the selected field.
+	"""
     await delete_request_and_user_message(callback.message, state)
     _, field, product_id = callback.data.split(":")
     await state.update_data(editing_field=field)
@@ -82,8 +82,8 @@ async def choose_edit_field(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def process_edit_field(message: Message, state: FSMContext):
     """
-    Обрабатывает новое значение выбранного поля.
-    """
+    Processes the new value of the selected field.
+	"""
     await delete_request_and_user_message(message, state)
     data = await state.get_data()
     field = data.get("editing_field")
@@ -132,8 +132,8 @@ async def process_edit_field(message: Message, state: FSMContext):
 @admin_only
 async def edit_category_callback(callback: CallbackQuery, state: FSMContext):
     """
-    Обрабатывает выбор новой категории.
-    """
+    Handles the selection of a new category.
+	"""
     await delete_request_and_user_message(callback.message, state)
     category_id = callback.data.replace("change_category:", "")
     data = await state.get_data()
@@ -154,8 +154,8 @@ async def edit_category_callback(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def save_product_edits(callback: CallbackQuery, state: FSMContext):
     """
-    Сохраняет изменения в товаре.
-    """
+    Saves the changes to the product.
+	"""
     await delete_request_and_user_message(callback.message, state)
     data = await state.get_data()
     product_id = data.get("edit_product_id")
@@ -179,8 +179,8 @@ async def save_product_edits(callback: CallbackQuery, state: FSMContext):
 
 async def show_edit_product_summary(message_or_callback, product, state, edit_fields: dict = None):
     """
-    Отправляет summary товара (с учётом изменений) с фото (если есть).
-    """
+    Sends the product summary (including changes) with a photo (if any).
+	"""
     await delete_summary(message_or_callback, state)
     await product.fetch_related("category")
     data = {
@@ -228,7 +228,9 @@ async def show_edit_product_summary(message_or_callback, product, state, edit_fi
 
 
 async def delete_summary(message, state):
-    """Функция для удаления summary"""
+    """
+    Function to delete the summary.
+	"""
     data = await state.get_data()
     summary_message_id = data.get('summary_message_id')
     if summary_message_id:

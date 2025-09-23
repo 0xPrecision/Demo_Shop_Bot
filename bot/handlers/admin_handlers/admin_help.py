@@ -9,8 +9,8 @@ router = Router()
 @admin_only
 async def admin_help(callback: CallbackQuery):
     """
-    Отправляет справку по возможностям админ-панели и быстрые ссылки.
-    """
+    Sends help about the admin panel features and quick links.
+	"""
     text = (
         "👑 <b>Админ-панель: помощь</b>\n\n"
         "<b>Основные возможности:</b>\n"

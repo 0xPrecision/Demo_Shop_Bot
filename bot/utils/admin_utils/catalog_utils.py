@@ -15,25 +15,25 @@ from database.models import Product
 
 def get_product_short_info(product) -> str:
     """
-    Генерирует короткую строку с основной информацией о товаре для инлайн-клавиатуры.
-
-    :param product: Объект товара (Product).
-    :return: Строка вида "Название | Цена ₽".
-    """
+    Generates a short string with the main product info for an inline keyboard.
+    
+    :param product: Product object.
+    :return: String like "Name | Price ₽".
+	"""
     return f"{product.name} | {format_price(product.price)} ₽"
 
 
 async def get_products_info(callback: CallbackQuery, page: int, text: str, func: Awaitable[Tuple[List["Product"], bool, bool]], state: FSMContext) -> None:
     """
-    Универсальный асинхронный обработчик для вывода списка товаров с пагинацией.
-
-    :param callback: CallbackQuery из aiogram.
-    :param page: Номер текущей страницы.
-    :param text: Текст для сообщения.
-    :param func: Awaitable, возвращающий кортеж (products, has_next, has_prev).
-    :param state: FSMContext из aiogram.
+    Generic asynchronous handler for displaying a paginated product list.
+    
+    :param callback: CallbackQuery from aiogram.
+    :param page: Current page number.
+    :param text: Message text.
+    :param func: Awaitable returning a tuple (products, has_next, has_prev).
+    :param state: FSMContext from aiogram.
     :return: None.
-    """
+	"""
     await delete_request_and_user_message(callback.message, state)
     products, has_next, has_prev = await func
     products_for_kb = [
@@ -63,17 +63,17 @@ async def filter_or_change_pr_category(
         product_id: int = None
     ) -> None:
         """
-        Универсальный обработчик для показа списка категорий:
-        — фильтрация товаров по категории
-        — или смена категории для конкретного товара (если указан product_id).
-        Работает с CallbackQuery и Message.
-
-        :param event: CallbackQuery или Message из aiogram.
-        :param text: Текст для сообщения.
-        :param state: FSMContext пользователя.
-        :param product_id: ID товара, если требуется сменить категорию (опционально).
+        Generic handler for displaying the list of categories:
+        — filter products by category
+        — or change the category for a specific product (if product_id is provided).
+        Works with CallbackQuery and Message.
+        
+        :param event: CallbackQuery or Message from aiogram.
+        :param text: Message text.
+        :param state: User's FSMContext.
+        :param product_id: Product ID if category change is required (optional).
         :return: None.
-        """
+	"""
         categories = await get_all_categories()
         if not categories:
             msg_text = "Категории не найдены.\n\nХотите создать новую?"

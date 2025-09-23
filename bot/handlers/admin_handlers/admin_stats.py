@@ -15,8 +15,8 @@ router = Router()
 @admin_only
 async def admin_stats_menu(callback: CallbackQuery):
     """
-    Главное меню статистики: summary и быстрая выгрузка заказов/товаров.
-    """
+    Statistics main menu: summary and quick export of orders/products.
+	"""
     date_from = datetime.now() - timedelta(days=30)
     orders = await Order.filter(created_at__gte=date_from).all()
 
@@ -51,8 +51,8 @@ async def admin_stats_menu(callback: CallbackQuery):
 @admin_only
 async def export_orders_csv(callback: CallbackQuery):
     """
-    Экспорт заказов за 30 дней в формате CSV.
-    """
+    Exports orders for the last 30 days to CSV.
+	"""
     date_from = datetime.now() - timedelta(days=30)
     orders = await Order.filter(created_at__gte=date_from).all()
 

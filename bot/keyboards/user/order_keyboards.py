@@ -4,7 +4,9 @@ from database.models import Order
 
 
 def format_status(status: str) -> str:
-    """Добавляет эмодзи к статусу."""
+    """
+    Adds an emoji to the status.
+	"""
     mapping = {
         "В работе": "🟡 В работе",
         "Готово": "🟢 Завершён",
@@ -14,14 +16,14 @@ def format_status(status: str) -> str:
 
 def show_orders_keyboard(orders: List[Order]) -> InlineKeyboardMarkup:
     """
-    Создаёт инлайн-клавиатуру для списка заказов пользователя.
-
-    На каждую строку заказа — отдельная кнопка для просмотра деталей заказа.
-    Внизу — кнопка возврата в главное меню.
-
-    :param orders: Список объектов Order пользователя.
-    :return: InlineKeyboardMarkup — инлайн-клавиатура.
-    """
+    Creates an inline keyboard for the user's orders list.
+    
+    Each order line gets its own button to view details.
+    At the bottom — a button to return to the main menu.
+    
+    :param orders: List of the user's Order objects.
+    :return: InlineKeyboardMarkup — inline keyboard.
+	"""
     keyboard = [
         [
             InlineKeyboardButton(
@@ -41,12 +43,12 @@ def show_orders_keyboard(orders: List[Order]) -> InlineKeyboardMarkup:
 def order_details_keyboard(order_id: Optional[int] = None) -> InlineKeyboardMarkup:
     """
     Создаёт клавиатуру для подробного просмотра заказа.
-
+    
     Кнопки: возврат к списку заказов и переход в главное меню.
-
+    
     :param order_id: идентификатор заказа (не используется, но можно для расширения).
     :return: InlineKeyboardMarkup — инлайн-клавиатура.
-    """
+	"""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="⬅️ К списку заказов", callback_data="menu_orders")],
         [InlineKeyboardButton(text="🏠 В главное меню", callback_data="menu_main")]

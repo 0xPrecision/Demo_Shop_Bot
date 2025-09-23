@@ -4,11 +4,11 @@ from bot.utils.common_utils import format_product_name
 
 def cart_keyboard(products: list[tuple], page: int, total_pages: int) -> InlineKeyboardMarkup:
     """
-    Создаёт инлайн-клавиатуру для корзины с навигацией и кнопкой "Оплатить".
-    :param products: Список кортежей (Cart, Product) для текущей страницы.
-    :param page: Текущая страница (от 0)
-    :param total_pages: Всего страниц
-    """
+    Creates an inline keyboard for the cart with navigation and a “Pay” button.
+    :param products: List of (Cart, Product) tuples for the current page.
+    :param page: Current page (from 0).
+    :param total_pages: Total number of pages.
+	"""
     keyboard = [
         [
             InlineKeyboardButton(

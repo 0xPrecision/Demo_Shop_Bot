@@ -4,11 +4,11 @@ from bot.utils.common_utils import format_price, format_product_name
 
 def show_categories_keyboard(categories: list[str]) -> InlineKeyboardMarkup:
     """
-    Формирует клавиатуру для выбора категории товаров.
-
-    :param categories: Список названий категорий.
-    :return: Объект InlineKeyboardMarkup с кнопками для каждой категории и кнопкой "В главное меню".
-    """
+    Builds a keyboard for selecting a product category.
+    
+    :param categories: List of category names.
+    :return: InlineKeyboardMarkup with a button for each category and a “Main Menu” button.
+	"""
     keyboard = [
         [InlineKeyboardButton(text=cat, callback_data=f"category_{cat}")]
         for cat in categories
@@ -19,14 +19,14 @@ def show_categories_keyboard(categories: list[str]) -> InlineKeyboardMarkup:
 
 def show_product_info_kb(product_id: int, source: str, category_name: str = None, page: int = None) -> InlineKeyboardMarkup:
     """
-    Формирует инлайн-клавиатуру для подробной информации о товаре.
-
-    :param product_id: ID товара.
-    :param source: Источник, откуда открыта карточка товара ('catalog' или 'cart').
-    :param category_name: Название категории для возврата.
-    :param page: Номер страницы для возврата.
+    Builds an inline keyboard for product details.
+    
+    :param product_id: Product ID.
+    :param source: Source from which the product card was opened ('catalog' or 'cart').
+    :param category_name: Category name for return.
+    :param page: Page number for return.
     :return: InlineKeyboardMarkup.
-    """
+	"""
     if source == "catalog":
         back_callback = f"category_{category_name}_{page}"
         kb = InlineKeyboardMarkup(
@@ -50,14 +50,14 @@ def show_product_info_kb(product_id: int, source: str, category_name: str = None
 
 def products_keyboard(products: list[dict], category: str, page: int, total_pages: int) -> InlineKeyboardMarkup:
     """
-    Создаёт инлайн-клавиатуру для вывода товаров с навигацией (пагинацией).
-
-    :param products: Список товаров на текущей странице
-    :param category: Текущая категория
-    :param page: Номер текущей страницы (от 0)
-    :param total_pages: Всего страниц
-    :return: InlineKeyboardMarkup с товарами и навигацией
-    """
+    Creates an inline keyboard for displaying products with pagination.
+    
+    :param products: List of products on the current page.
+    :param category: Current category.
+    :param page: Current page number (from 0).
+    :param total_pages: Total number of pages.
+    :return: InlineKeyboardMarkup with products and navigation.
+	"""
     nav_row = []
     if page > 0:
         nav_row.append(InlineKeyboardButton(

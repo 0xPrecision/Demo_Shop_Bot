@@ -21,9 +21,9 @@ router = Router()
 
 async def universal_name_handler(message: Message, state: FSMContext) -> None:
     """
-    Обработчик ФИО для чекаута и профиля. После успешного ввода сразу показывает шаг с телефоном.
-    Сообщения всегда очищаются.
-    """
+    Full name handler for checkout and profile. After successful input, immediately shows the phone step.
+    Messages are always cleared.
+	"""
     await delete_request_and_user_message(message, state)
     name = message.text
 
@@ -52,9 +52,9 @@ async def universal_name_handler(message: Message, state: FSMContext) -> None:
 
 async def universal_phone_handler(message: Message, state: FSMContext) -> None:
     """
-    Обработчик телефона для чекаута и профиля. После успешного ввода показывает следующий шаг: комментарий (чекаут) или адрес (профиль).
-    Сообщения всегда очищаются.
-    """
+    Phone number handler for checkout and profile. After successful input, shows the next step: comment (checkout) or address (profile).
+    Messages are always cleared.
+	"""
     await delete_request_and_user_message(message, state)
     phone = message.text
     if not validate_phone(phone):
@@ -88,9 +88,9 @@ async def universal_phone_handler(message: Message, state: FSMContext) -> None:
 
 async def universal_address_handler(message: Message, state: FSMContext) -> None:
     """
-    Обработчик адреса для профиля. После успешного ввода выводит итог и клавиатуру редактирования.
-    Сообщения всегда очищаются.
-    """
+    Address handler for the profile. After successful input, shows the summary and editing keyboard.
+    Messages are always cleared.
+	"""
     await delete_request_and_user_message(message, state)
     address = message.text
     if not validate_address(address):
@@ -118,12 +118,12 @@ async def universal_address_handler(message: Message, state: FSMContext) -> None
 
 async def universal_exit(callback: CallbackQuery, state: FSMContext):
     """
-    Универсальная функция выхода из текущего сценария (оформления заказа и др.).
-    Очищает предыдущие сообщения и сбрасывает состояние FSM.
-
-    :param callback: Объект CallbackQuery от пользователя.
-    :param state: Контекст состояния FSM.
-    """
+    Universal function to exit the current scenario (checkout, etc.).
+    Clears previous messages and resets the FSM state.
+    
+    :param callback: User's CallbackQuery object.
+    :param state: FSM context.
+	"""
     await delete_request_and_user_message(callback.message, state)
     if callback.data == "menu_catalog":
         await show_categories(callback)

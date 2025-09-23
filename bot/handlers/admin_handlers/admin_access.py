@@ -11,17 +11,17 @@ router = Router()
 
 def is_admin(user_id: int) -> bool:
     """
-    Проверяет, является ли пользователь админом по user_id.
+    Checks whether the user is an admin by user_id.
     :param user_id: Telegram user ID.
-    :return: True, если админ.
-    """
+    :return: Tene if admin.
+	"""
     return user_id in ADMIN_IDS
 
 def admin_only(handler: Callable) -> Callable:
     """
-    Декоратор для ограничения доступа только для админов.
-    Можно вешать на любые admin-хэндлеры.
-    """
+    Decorator to restrict access to admins only.
+    Can be applied to any admin handlers.
+	"""
     async def wrapper(*args, **kwargs):
         event = args[0]
         user_id = getattr(event.from_user, "id", None) if hasattr(event, "from_user") else getattr(event.message.from_user, "id", None)

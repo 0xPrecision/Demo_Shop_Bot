@@ -15,8 +15,8 @@ router = Router()
 @admin_only
 async def admin_catalog_menu(callback: CallbackQuery):
     """
-    Главное меню каталога: выбор между товарами и категориями.
-    """
+    Catalog main menu: choose between products and categories.
+	"""
     await callback.message.edit_text(
         "Что вы хотите просмотреть/редактировать?",
         reply_markup=admin_catalog_menu_keyboard()
@@ -28,8 +28,8 @@ async def admin_catalog_menu(callback: CallbackQuery):
 @admin_only
 async def admin_products_list(callback: CallbackQuery, state: FSMContext):
     """
-    Показывает первую страницу товаров.
-    """
+    Displays the first page of products.
+	"""
     await delete_request_and_user_message(callback.message, state)
     page = 1
     text = "🛒 <b>Список товаров</b> (выберите для просмотра/редактирования):"
@@ -42,8 +42,8 @@ async def admin_products_list(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def admin_categories_entry(callback: CallbackQuery, state: FSMContext):
     """
-    Показывает инлайн-клавиатуру для выбора категории товаров (фильтр).
-    """
+    Displays an inline keyboard for selecting a product category (filter).
+	"""
     text = "Категории товаров (выберите для просмотра/редактирования):"
     await filter_or_change_pr_category(callback, state, text)
     await callback.answer()
@@ -53,8 +53,8 @@ async def admin_categories_entry(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def admin_products_page(callback: CallbackQuery, state: FSMContext):
     """
-    Перелистывание страниц каталога товаров.
-    """
+    Paginates through catalog pages.
+	"""
     page = int(callback.data.split(":")[1])
     text = f"🛒 <b>Товары</b> (стр. {page}):"
     func = get_products_page(page)
@@ -66,8 +66,8 @@ async def admin_products_page(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def admin_product_detail(callback: CallbackQuery, state: FSMContext):
     """
-    Показывает детали товара и клавиатуру для админа.
-    """
+    Displays product details and an admin keyboard.
+	"""
     product_id = int(callback.data.split(":")[1])
     product = await get_product_by_id(product_id)
     await product.fetch_related("category")
@@ -105,7 +105,9 @@ async def admin_product_detail(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("admin_select_category:"))
 @admin_only
 async def admin_products_by_category(callback: CallbackQuery):
-    """Показывает опции выбранной категории"""
+    """
+    Displays options for the selected category.
+	"""
     category_id = int(callback.data.split(":", 1)[1])
     await callback.message.edit_text("Выберете действие:",
                                      reply_markup=show_products_or_edit_category(category_id))
@@ -116,8 +118,8 @@ async def admin_products_by_category(callback: CallbackQuery):
 @admin_only
 async def admin_products_by_category(callback: CallbackQuery, state: FSMContext):
     """
-    Показывает товары выбранной категории (фильтр) для админа.
-    """
+    Displays products from the selected category (admin filter).
+	"""
     category_id = int(callback.data.split(":", 1)[1])
     page = 1
     category = await Category.get(id=category_id)

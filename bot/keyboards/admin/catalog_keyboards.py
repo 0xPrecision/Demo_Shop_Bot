@@ -85,7 +85,9 @@ def show_products_for_search(products) -> InlineKeyboardMarkup:
 
 
 def back_to_search_keyboard() -> InlineKeyboardMarkup:
-    """Клавиатура для возврата к поиску товара."""
+    """
+    Keyboard for returning to product search.
+	"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="🔍 Повторить попытку", callback_data="admin_search_product")],
@@ -95,7 +97,9 @@ def back_to_search_keyboard() -> InlineKeyboardMarkup:
 
 
 def product_admin_keyboard(product_id: int) -> InlineKeyboardMarkup:
-    """Клавиатура для редактирования/удаления товара."""
+    """
+    Keyboard for editing/deleting a product.
+	"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="✏️ Редактировать", callback_data=f"admin_edit_product:{product_id}")],
@@ -107,8 +111,8 @@ def product_admin_keyboard(product_id: int) -> InlineKeyboardMarkup:
 
 def product_edit_field_keyboard(product_id: int) -> InlineKeyboardMarkup:
     """
-    Клавиатура выбора поля для редактирования товара.
-    """
+    Keyboard for selecting a product field to edit.
+	"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="Название", callback_data=f"edit_field:name:{product_id}")],

@@ -6,11 +6,11 @@ from database.models import User, Product, Category, Cart, Order, OrderItem
 
 async def get_or_create_user_profile(user_id: int) -> Optional[User]:
     """
-    Возвращает профиль пользователя по Telegram ID.
-    Если профиль ещё не создан, заполняет поля дефолтными значениями.
+    Returns the user profile by Telegram ID.
+    If the profile does not exist, fills fields with default values.
     :param user_id: Telegram user ID.
-    :return: Объект User или None.
-    """
+    :return: User object or None.
+	"""
     user = await User.get_or_none(id=user_id)
     if not user:
         user = await User.create(id=user_id, full_name="", phone="", address="")
@@ -18,13 +18,13 @@ async def get_or_create_user_profile(user_id: int) -> Optional[User]:
 
 async def update_user_profile(user_id: int, name: str = None, phone: str = None, address: str = None) -> User | None:
     """
-    Обновляет профиль пользователя.
+    Updates the user profile.
     :param user_id: Telegram user ID.
-    :param name: Имя пользователя.
-    :param phone: Телефон.
-    :param address: Адрес (опционально).
-    :return: Объект User.
-    """
+    :param name: User name.
+    :param phone: Phone.
+    :param address: Address (optional).
+    :return: User object.
+	"""
     user = await User.get_or_none(id=user_id)
     if not user:
         return None
@@ -39,13 +39,13 @@ async def update_user_profile(user_id: int, name: str = None, phone: str = None,
 
 async def create_user_profile(user_id: int, name: str, phone: str, address: str) -> User:
     """
-    Создаёт профиль пользователя.
+    Creates a user profile.
     :param user_id: Telegram user ID.
-    :param name: Имя пользователя.
-    :param phone: Телефон.
-    :param address: Адрес (опционально).
-    :return: Объект User.
-    """
+    :param name: User name.
+    :param phone: Phone.
+    :param address: Address (optional).
+    :return: User object.
+	"""
     user = await User.get_or_none(id=user_id)
     if user is None:
         return await User.create(id=user_id, full_name=name, phone=phone, address=address)
@@ -60,28 +60,30 @@ async def create_user_profile(user_id: int, name: str, phone: str, address: str)
 
 async def create_category(name: str) -> Category:
     """
-    Создаёт новую категорию.
-    :param name: Название категории.
-    :return: Объект Category.
-    """
+    Creates a new category.
+    :param name: Category name.
+    :return: Category object.
+	"""
     category, _ = await Category.get_or_create(name=name)
     return category
 
 async def get_all_categories() -> List[Category]:
     """
-    Возвращает список всех категорий.
-    :return: Список объектов Category.
-    """
+    Returns the list of all categories.
+    :return: List of Category objects.
+	"""
     return await Category.all()
 
 async def update_category(cat_id: int, new_name: str):
-    """ Обновляет наименование категории."""
+    """
+    Updates the category name.
+	"""
     return await Category.filter(id=cat_id).update(name=new_name)
 
 async def get_category_by_name(name: str):
     """
-    Возвращает объект категории по её названию.
-    """
+    Returns a category object by its name.
+	"""
     return await Category.get(name=name)
 
 # -------- PRODUCTS --------
@@ -96,16 +98,16 @@ async def create_product(
     is_active: bool = True
 ) -> Product:
     """
-    Создаёт новый товар.
-    :param name: Название товара.
-    :param description: Описание товара.
-    :param price: Цена.
-    :param stock: Количество на складе.
-    :param category: Объект категории.
-    :param photo: File ID фото.
-    :param is_active: Активен ли товар.
-    :return: Объект Product.
-    """
+    Creates a new product.
+    :param name: Product name.
+    :param description: Product description.
+    :param price: Price.
+    :param stock: Stock quantity.
+    :param category: Category object.
+    :param photo: Photo file ID.
+    :param is_active: Whether the product is active.
+    :return: Product object.
+	"""
     return await Product.create(
         name=name,
         description=description,
@@ -118,11 +120,11 @@ async def create_product(
 
 async def update_product(product_id: int, **fields: Any):
     """
-    Обновляет выбранные поля товара по product_id.
-    :param product_id: ID товара.
-    :param fields: Ключ-значение, где ключ — поле модели Product, значение — новое значение.
-    :return: Количество обновлённых строк (int)
-    """
+    Updates selected product fields by product_id.
+    :param product_id: Product ID.
+    :param fields: Key-value pairs where the key is a Product field and the value is the new value.
+    :return: Number of updated rows (int)
+	"""
     # Если в fields есть category как объект — вытаскиваем id:
     if "category" in fields and fields["category"]:
         category = fields["category"]
@@ -138,27 +140,27 @@ async def update_product(product_id: int, **fields: Any):
 
 async def get_all_products() -> List[Product]:
     """
-    Возвращает список всех товаров.
-    :return: Список объектов Product.
-    """
+    Returns the list of all products.
+    :return: List of Product objects.
+	"""
     return await Product.filter(is_active=True).prefetch_related("category").all()
 
 async def get_products_by_category(category: Category) -> List[Product]:
     """
-    Возвращает список товаров по категории.
-    :param category: Объект категории.
-    :return: Список объектов Product.
-    """
+    Returns the list of products for a category.
+    :param category: Category object.
+    :return: List of Product objects.
+	"""
     return await Product.filter(category=category, is_active=True).all()
 
 async def get_products_page_by_category(category_id: int, page: int = 1, page_size: int = 10):
     """
-    Получает товары определённой категории с пагинацией.
-    :param category_id: Название категории
-    :param page: Страница (от 1)
-    :param page_size: Кол-во товаров на странице
-    :return: (список товаров, has_next, has_prev)
-    """
+    Retrieves products of a given category with pagination.
+    :param category_id: Category name
+    :param page: Page (from 1)
+    :param page_size: Number of products per page
+    :return: (list of products, has_next, has_prev)
+	"""
     total = await Product.filter(category_id=category_id, is_active=True).count()
     total_pages = (total + page_size - 1) // page_size
     skip = (page - 1) * page_size
@@ -169,10 +171,10 @@ async def get_products_page_by_category(category_id: int, page: int = 1, page_si
 
 async def get_product_by_id(product_id: int) -> Optional[Product]:
     """
-    Возвращает товар по его id.
-    :param product_id: ID товара.
-    :return: Объект Product или None.
-    """
+    Returns a product by its ID.
+    :param product_id: Product ID.
+    :return: Product object or None.
+	"""
     return await Product.get_or_none(id=product_id)
 
 
@@ -190,12 +192,12 @@ async def get_products_page(page: int = 1, page_size: int = 10) -> Tuple[List[Pr
 
 async def add_to_cart(user_id: int, product_id: int, quantity: int) -> Cart:
     """
-    Добавляет товар в корзину пользователя или увеличивает количество, если уже есть.
-    :param user_id: ID пользователя.
-    :param product_id: ID товара.
-    :param quantity: Количество.
-    :return: Объект Cart (позиция в корзине).
-    """
+    Adds a product to the user's cart or increases the quantity if it already exists.
+    :param user_id: User ID.
+    :param product_id: Product ID.
+    :param quantity: Quantity.
+    :return: Cart object (cart item).
+	"""
     user = await get_or_create_user_profile(user_id)
     product = await Product.get(id=product_id)
     cart_item = await Cart.get_or_none(user=user, product=product)
@@ -208,29 +210,29 @@ async def add_to_cart(user_id: int, product_id: int, quantity: int) -> Cart:
 
 async def get_cart(user_id: int) -> List[Cart]:
     """
-    Возвращает корзину пользователя (список позиций Cart).
-    :param user_id: ID пользователя.
-    :return: Список Cart.
-    """
+    Returns the user's cart (list of Cart items).
+    :param user_id: User ID.
+    :return: List of Cart.
+	"""
     user = await get_or_create_user_profile(user_id)
     return await Cart.filter(user=user).prefetch_related("product").all()
 
 async def remove_from_cart(user_id: int, product_id: int) -> None:
     """
-    Удаляет позицию товара из корзины пользователя.
-    :param user_id: Telegram ID пользователя.
-    :param product_id: ID товара для удаления из корзины.
+    Removes a product item from the user's cart.
+    :param user_id: Telegram user ID.
+    :param product_id: Product ID to remove from the cart.
     :return: None
-    """
+	"""
     user = await get_or_create_user_profile(user_id)
     await Cart.filter(user=user, product=product_id).delete()
 
 async def clear_cart(user_id: int) -> None:
     """
-    Очищает корзину пользователя.
-    :param user_id: ID пользователя.
+    Clears the user's cart.
+    :param user_id: User ID.
     :return: None
-    """
+	"""
     user = await get_or_create_user_profile(user_id)
     await Cart.filter(user=user).delete()
 
@@ -247,17 +249,17 @@ async def create_order(
     comment: str = "-",
 ) -> Optional[Order]:
     """
-    Создаёт заказ на основе корзины пользователя.
-    :param user_id: ID пользователя.
-    :param name: ФИО пользователя.
-    :param phone: Номер телефона пользователя.
-    :param status: Статус заказа.
-    :param payment_method: Способ оплаты.
-    :param delivery_method: Способ доставки.
-    :param address: Адрес доставки.
-    :param comment: Комментарий.
-    :return: Объект Order или None, если корзина пуста.
-    """
+    Creates an order from the user's cart.
+    :param user_id: User ID.
+    :param name: User full name.
+    :param phone: User phone number.
+    :param status: Order status.
+    :param payment_method: Payment method.
+    :param delivery_method: Delivery method.
+    :param address: Delivery address.
+    :param comment: Comment.
+    :return: Order object or None if the cart is empty.
+	"""
     user = await get_or_create_user_profile(user_id)
     cart_items = await Cart.filter(user=user).prefetch_related('product')
     if not cart_items:
@@ -289,10 +291,10 @@ async def create_order(
 
 async def get_orders(user_id: int = None) -> List[Order]:
     """
-    Возвращает список заказов пользователя.
-    :param user_id: ID пользователя.
-    :return: Список заказов (Order).
-    """
+    Returns the list of user orders.
+    :param user_id: User ID.
+    :return: List of orders (Order).
+	"""
     if user_id:
         return await Order.filter(user_id=user_id)
     else:
@@ -300,18 +302,18 @@ async def get_orders(user_id: int = None) -> List[Order]:
 
 async def get_order_items(order: Order) -> List[OrderItem]:
     """
-    Возвращает позиции определённого заказа.
-    :param order: Объект заказа.
-    :return: Список позиций заказа (OrderItem).
-    """
+    Returns the items of a given order.
+    :param order: Order object.
+    :return: List of order items (OrderItem).
+	"""
     return await OrderItem.filter(order=order).prefetch_related('product').all()
 
 async def get_order_by_id(order_id: int) -> Optional[Order]:
     """
-    Возвращает заказ по его id.
-    :param order_id: ID заказа.
-    :return: Объект Order или None.
-    """
+    Returns an order by its ID.
+    :param order_id: Order ID.
+    :return: Order object or None.
+	"""
     order = await Order.get_or_none(id=order_id)
     if order:
         await order.fetch_related('user')

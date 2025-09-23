@@ -13,8 +13,8 @@ PAGE_SIZE = 5
 
 async def show_categories(callback: CallbackQuery) -> None:
     """
-    Показывает список категорий товаров.
-    """
+    Displays the list of product categories.
+	"""
     products = await get_all_products()
     categories = sorted({p.category.name for p in products if p.category is not None})
     if not categories:
@@ -28,8 +28,8 @@ async def show_categories(callback: CallbackQuery) -> None:
 @router.callback_query(F.data.startswith("category_"))
 async def show_products_in_category(callback: CallbackQuery, state: FSMContext) -> None:
     """
-    Показывает товары выбранной категории с пагинацией.
-    """
+    Displays products of the selected category with pagination.
+	"""
     await delete_request_and_user_message(callback.message, state)
     data = callback.data.split("_", 2)
     category_name = data[1]
@@ -60,9 +60,9 @@ async def show_products_in_category(callback: CallbackQuery, state: FSMContext) 
 @router.callback_query(F.data.startswith("product_"))
 async def show_product_info(callback: CallbackQuery):
     """
-    Универсальный хэндлер для отображения подробной информации о товаре,
-    различает источник (catalog/cart) по callback_data.
-    """
+    Generic handler for displaying product details,
+    distinguishes the source (catalog/cart) by callback_data.
+	"""
     try:
         parts = callback.data.split("_")
         product_id = int(parts[1])

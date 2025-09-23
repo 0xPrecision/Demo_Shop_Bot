@@ -7,12 +7,12 @@ from tortoise import Tortoise
 
 def backup_sqlite_db(db_path: str = "shop.db", backup_dir: str = "backups") -> None:
     """
-    Создаёт резервную копию SQLite-базы перед запуском приложения.
-
+    Creates a backup of the SQLite database before launching the application.
+    
     Args:
-        db_path (str): Путь к файлу базы данных.
-        backup_dir (str): Папка для хранения резервных копий.
-    """
+    db_path (str): Path to the database file.
+    backup_dir (str): Directory for storing backups.
+	"""
     if os.path.exists(db_path):
         os.makedirs(backup_dir, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -21,8 +21,8 @@ def backup_sqlite_db(db_path: str = "shop.db", backup_dir: str = "backups") -> N
 
 async def init_db(db_url: str = "sqlite://shop.db") -> None:
     """
-    Инициализация подключения к базе данных и создание таблиц, если они ещё не созданы.
-    """
+    Initializes the database connection and creates tables if they do not already exist.
+	"""
     if db_url.startswith("sqlite://"):
         db_path = db_url.replace("sqlite://", "")
     else:
@@ -43,6 +43,6 @@ async def init_db(db_url: str = "sqlite://shop.db") -> None:
 
 async def close_db() -> None:
     """
-    Корректное закрытие всех соединений с БД.
-    """
+    Properly closes all database connections.
+	"""
     await Tortoise.close_connections()

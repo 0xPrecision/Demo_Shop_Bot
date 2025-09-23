@@ -14,8 +14,8 @@ router = Router()
 
 async def show_cart(callback: CallbackQuery, state: FSMContext) -> None:
     """
-    Показывает пользователю его корзину.
-    """
+    Displays the user's cart.
+	"""
     await delete_request_and_user_message(callback.message, state)
     user_id = callback.from_user.id
     cart_items = await get_cart(user_id)
@@ -28,11 +28,11 @@ async def show_cart(callback: CallbackQuery, state: FSMContext) -> None:
 @router.callback_query(F.data.startswith("cart_"))
 async def paginate_cart(callback: CallbackQuery) -> None:
     """
-    Обработка пагинации корзины.
-
-    :param callback: CallbackQuery от пользователя.
+    Handles cart pagination.
+    
+    :param callback: User's CallbackQuery.
     :return: None
-    """
+	"""
     page = int(callback.data.split("_")[1]) if "_" in callback.data else 0
     cart_items = await get_cart(callback.from_user.id)
     text, keyboard = await build_cart_view(cart_items, page)
@@ -48,11 +48,11 @@ async def paginate_cart(callback: CallbackQuery) -> None:
 @router.callback_query(F.data.startswith("addtocart_"))
 async def add_to_cart_handler(callback: CallbackQuery) -> None:
     """
-    Обработчик кнопки 'В корзину': добавляет товар в корзину пользователя.
-
-    :param callback: CallbackQuery от пользователя.
+    Handler for the 'Add to cart' button: adds a product to the user's cart.
+    
+    :param callback: User's CallbackQuery.
     :return: None
-    """
+	"""
     user_id = callback.from_user.id
     product_id = int(callback.data.split("_")[1])
 
@@ -71,11 +71,11 @@ async def add_to_cart_handler(callback: CallbackQuery) -> None:
 @router.callback_query(F.data.startswith("removefromcart_"))
 async def remove_from_cart_handler(callback: CallbackQuery) -> None:
     """
-    Обработчик кнопки 'Убрать из корзины': удаляет товар из корзины пользователя.
-
-    :param callback: CallbackQuery от пользователя.
+    Handler for the 'Remove from cart' button: removes a product from the user's cart.
+    
+    :param callback: User's CallbackQuery.
     :return: None
-    """
+	"""
     user_id = callback.from_user.id
     parts = callback.data.split("_")
     product_id = int(parts[1])
@@ -99,8 +99,8 @@ async def remove_from_cart_handler(callback: CallbackQuery) -> None:
 @router.callback_query(F.data == "clear_cart")
 async def clear_cart_handler(callback: CallbackQuery, state: FSMContext) -> None:
     """
-    Обработчик кнопки 'Очистить корзину': очищает корзину пользователя.
-    """
+    Handler for the 'Clear cart' button: clears the user's cart.
+	"""
     user_id = callback.from_user.id
     await clear_cart(user_id)
     await delete_request_and_user_message(callback.message, state)

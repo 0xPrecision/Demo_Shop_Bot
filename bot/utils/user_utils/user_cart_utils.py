@@ -15,13 +15,13 @@ async def build_cart_view(
     page: int = 0
 ) -> Tuple[str, InlineKeyboardMarkup]:
     """
-    Формирует текст и клавиатуру для отображения корзины пользователя с пагинацией.
-    Показывает всю корзину в тексте, а в инлайн-кнопках — только товары для этой страницы.
-
-    :param cart_items: Список объектов Cart пользователя.
-    :param page: Номер страницы (от 0).
-    :return: Кортеж (текст для сообщения, инлайн-клавиатура)
-    """
+    Builds text and a keyboard for displaying the user's cart with pagination.
+    Shows the full cart in the text, but only products for the current page in inline buttons.
+    
+    :param cart_items: List of the user's Cart objects.
+    :param page: Page number (from 0).
+    :return: Tuple (message text, inline keyboard).
+	"""
     if cart_items:
         # Загружаем все товары одной выборкой и делаем словарь {id: Product}
         product_ids = [item.product_id for item in cart_items]

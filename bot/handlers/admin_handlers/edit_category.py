@@ -17,8 +17,8 @@ router = Router()
 @admin_only
 async def choose_category_to_edit(callback: CallbackQuery):
     """
-    Выбор опции для категории.
-    """
+    Selects an option for the category.
+	"""
     category_id = int(callback.data.split(":", 1)[1])
     await callback.message.edit_text("Выберете действие:",
                                      reply_markup=edit_or_deletion_category(category_id))
@@ -29,8 +29,8 @@ async def choose_category_to_edit(callback: CallbackQuery):
 @admin_only
 async def rename_category_start(callback: CallbackQuery, state: FSMContext):
     """
-    Запускает FSM для ввода нового имени категории.
-    """
+    Starts the FSM to enter a new category name.
+	"""
     cat_id = int(callback.data.split(":")[1])
     await state.update_data(rename_category_id=cat_id)
     msg = await callback.message.edit_text("Введите новое название для категории:")
@@ -43,8 +43,8 @@ async def rename_category_start(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def rename_category_process(message: Message, state: FSMContext):
     """
-    Получает новое имя категории и сохраняет в базе.
-    """
+    Takes the new category name and saves it to the database.
+	"""
     await delete_request_and_user_message(message, state)
     new_name = message.text.strip()
     data = await state.get_data()
@@ -72,8 +72,8 @@ async def rename_category_process(message: Message, state: FSMContext):
 @admin_only
 async def delete_category_confirm(callback: CallbackQuery):
     """
-    Проверяет, можно ли удалить категорию (нет ли в ней товаров), и просит подтверждение.
-    """
+    Checks whether the category can be deleted (no products inside) and requests confirmation.
+	"""
     cat_id = int(callback.data.split(":")[1])
     count = await Product.filter(category_id=cat_id).count()
     if count > 0:
@@ -92,8 +92,8 @@ async def delete_category_confirm(callback: CallbackQuery):
 @admin_only
 async def delete_category_execute(callback: CallbackQuery):
     """
-    Удаляет категорию из базы (если нет товаров).
-    """
+    Deletes the category from the database (if it has no products).
+	"""
     cat_id = int(callback.data.split(":")[1])
     await Category.filter(id=cat_id).delete()
     await callback.message.edit_text("Категория удалена.", reply_markup=back_menu())

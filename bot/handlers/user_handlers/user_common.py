@@ -9,8 +9,8 @@ router = Router()
 @router.message(F.text == "/start")
 async def start_cmd(message: Message, state: FSMContext):
     """
-    Обработчик команды /start — показывает инлайн главное меню.
-    """
+    Handler for the /start command — displays the inline main menu.
+	"""
     await state.clear()
     await message.answer(
         "<b>Добро пожаловать в магазин!</b>\n"

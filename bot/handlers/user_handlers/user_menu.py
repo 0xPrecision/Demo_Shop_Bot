@@ -15,16 +15,16 @@ router = Router()
 @router.callback_query(lambda c: c.data in ["menu_main", "menu_catalog"])
 async def universal_exit_handler(callback: CallbackQuery, state: FSMContext):
     """
-    Универсальный хэндлер выхода из любых состояний по кнопкам "В главное меню" и "В каталог".
-    """
+    Universal handler for exiting any state via the “Main Menu” and “Catalog” buttons.
+	"""
     await universal_exit(callback, state)
 
 
 @router.callback_query(F.data.startswith("menu_"))
 async def menu_router(callback: CallbackQuery, state: FSMContext):
     """
-    Маршрутизирует нажатия по главным разделам меню.
-    """
+    Routes clicks across the main menu sections.
+	"""
     action = callback.data.replace("menu_", "")
     await callback.message.delete()
     if action == "catalog":
@@ -42,9 +42,9 @@ async def menu_router(callback: CallbackQuery, state: FSMContext):
 @router.message(F.text)
 async def text_catch_all_handler(message: Message, state: FSMContext):
     """
-    Ловит любой текст, когда ожидается только callback-кнопка.
-    Показывает alert и не меняет состояние FSM.
-    """
+    Catches any text when only a callback button is expected.
+    Shows an alert and does not change the FSM state.
+	"""
     if message.text != '/start_admin':
         await delete_user_message_safe(message)
         msg = await message.answer("Пожалуйста, используйте кнопки выше 👆")

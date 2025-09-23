@@ -13,9 +13,9 @@ router = Router()
 @admin_only
 async def admin_panel_open(event: Message | CallbackQuery, state: FSMContext):
     """
-    Универсальный обработчик открытия админ-меню.
-    Работает и для сообщений, и для callback-кнопок.
-    """
+    Generic handler for opening the admin menu.
+    Works for both messages and callback buttons.
+	"""
     await state.clear()
     if hasattr(event, "message"):  # CallbackQuery
         msg = event.message

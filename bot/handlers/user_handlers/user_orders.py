@@ -11,8 +11,8 @@ router = Router()
 @router.callback_query(F.data == 'menu_orders')
 async def show_history_orders_menu(callback: CallbackQuery, state: FSMContext) -> None:
     """
-    Обработчик для отображения меню заказов пользователя.
-    """
+    Handler for displaying the user's orders menu.
+	"""
     text = "У вас пока нет заказов."
     await show_orders_menu(callback, state, text)
     await callback.answer()

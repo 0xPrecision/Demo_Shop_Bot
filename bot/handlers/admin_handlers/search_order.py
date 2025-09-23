@@ -17,8 +17,8 @@ router = Router()
 @admin_only
 async def start_search_order(callback: CallbackQuery, state: FSMContext):
     """
-    Запускает FSM поиска заказа.
-    """
+    Starts the FSM for order search.
+	"""
     msg = await callback.message.edit_text("🔍 Введите ID заказа, имя или телефон клиента для поиска:")
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(OrderSearchStates.waiting_query)
@@ -29,8 +29,8 @@ async def start_search_order(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def search_order_query(message: Message, state: FSMContext):
     """
-    Ищет заказ по ID, имени или телефону.
-    """
+    Searches for an order by ID, name, or phone number.
+	"""
     await delete_request_and_user_message(message, state)
     query = message.text.strip()
 

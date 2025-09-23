@@ -20,8 +20,8 @@ router = Router()
 @admin_only
 async def start_add_product(callback: CallbackQuery, state: FSMContext):
     """
-    Запуск FSM добавления товара (шаг 1: название).
-    """
+    Start the FSM for adding a product (step 1: name).
+	"""
     msg = await callback.message.edit_text("Введите название товара:", reply_markup=back_menu())
     await state.set_state(AddProductStates.waiting_name)
     await state.update_data(main_message_id=msg.message_id)
@@ -32,8 +32,8 @@ async def start_add_product(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def add_product_name(message: Message, state: FSMContext):
     """
-    Шаг 1. Получение названия товара.
-    """
+    Step 1. Get the product name.
+	"""
     await delete_request_and_user_message(message, state)
     name = message.text.strip()
     if not name:
@@ -51,8 +51,8 @@ async def add_product_name(message: Message, state: FSMContext):
 @admin_only
 async def add_product_price(message: Message, state: FSMContext):
     """
-    Шаг 2. Получение цены товара.
-    """
+    Step 2. Get the product price.
+	"""
     await delete_request_and_user_message(message, state)
     price_text = message.text.replace(",", ".").strip()
     try:
@@ -74,8 +74,8 @@ async def add_product_price(message: Message, state: FSMContext):
 @admin_only
 async def add_product_description(message: Message, state: FSMContext):
     """
-    Шаг 3. Получение описания товара.
-    """
+    Step 3. Get the product description.
+	"""
     await delete_request_and_user_message(message, state)
     description = message.text.strip()
     if description == "-":
@@ -91,8 +91,8 @@ async def add_product_description(message: Message, state: FSMContext):
 @admin_only
 async def add_product_stock(message: Message, state: FSMContext):
     """
-    Шаг 4. Получение остатка товара.
-    """
+    Step 4. Get the product stock.
+	"""
     await delete_request_and_user_message(message, state)
     try:
         stock = int(message.text)
@@ -113,8 +113,8 @@ async def add_product_stock(message: Message, state: FSMContext):
 @admin_only
 async def add_product_photo(message: Message, state: FSMContext):
     """
-    Шаг 5. Получение фото товара.
-    """
+    Step 5. Get the product photo.
+	"""
     await delete_request_and_user_message(message, state)
     photo = message.photo[-1].file_id  # Берём максимальное качество
     await state.update_data(photo=photo)
@@ -127,8 +127,8 @@ async def add_product_photo(message: Message, state: FSMContext):
 @admin_only
 async def add_product_photo_skip(message: Message, state: FSMContext):
     """
-    Шаг 5. Пропуск добавления фото.
-    """
+    Step 5. Skip adding a photo.
+	"""
     await delete_request_and_user_message(message, state)
     if message.text.strip() != "-":
         msg = await message.answer("Пожалуйста, отправьте фото товара или введите '-' для пропуска.")
@@ -145,8 +145,8 @@ async def add_product_photo_skip(message: Message, state: FSMContext):
 @admin_only
 async def admin_edit_category(callback: CallbackQuery, state: FSMContext):
     """
-    Показывает клавиатуру для смены категории выбранного товара.
-    """
+    Displays a keyboard for changing the category of the selected product.
+	"""
     product_id = int(callback.data.split(":")[1])
     text = "Выберите новую категорию для товара:"
     await filter_or_change_pr_category(callback, state, text, product_id)
@@ -158,8 +158,8 @@ async def admin_edit_category(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def add_product_category(event: Union[CallbackQuery, Message], state: FSMContext):
     """
-    Шаг 6. Получение категории товара и финальное подтверждение.
-    """
+    Step 6. Get the product category and perform the final confirmation.
+	"""
     if isinstance(event, CallbackQuery):
         await delete_request_and_user_message(event.message, state)
     else:
@@ -212,8 +212,8 @@ async def add_product_category(event: Union[CallbackQuery, Message], state: FSMC
 @admin_only
 async def confirm_create_product(callback: CallbackQuery, state: FSMContext):
     """
-    Финальный шаг — создание товара в базе.
-    """
+    Final step — create the product in the database.
+	"""
     data = await state.get_data()
     category = await Category.get(id=data['category_id'])
     await create_product(

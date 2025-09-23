@@ -16,8 +16,8 @@ router = Router()
 @admin_only
 async def admin_orders_list(callback: CallbackQuery):
     """
-    Показывает первую страницу списка заказов.
-    """
+    Displays the first page of the orders list.
+	"""
     page = 1
     text = "📦 <b>Список заказов</b> (выбери заказ для просмотра):"
     await show_orders(callback, page, text)
@@ -28,8 +28,8 @@ async def admin_orders_list(callback: CallbackQuery):
 @admin_only
 async def admin_orders_page(callback: CallbackQuery):
     """
-    Перелистывание страниц списка заказов.
-    """
+    Paginates through the orders list.
+	"""
     page = int(callback.data.split(":")[1])
     text = f"📦 <b>Список заказов</b> (стр. {page}):"
     await show_orders(callback, page, text)
@@ -40,8 +40,8 @@ async def admin_orders_page(callback: CallbackQuery):
 @admin_only
 async def admin_order_detail(callback: CallbackQuery, state: FSMContext):
     """
-    Показывает детали одного заказа.
-    """
+    Displays details of a single order.
+	"""
     order_id = int(callback.data.split(":")[1])
     order = await get_order_by_id(order_id)
 
@@ -56,9 +56,9 @@ async def admin_order_detail(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def change_order_status_menu(callback: CallbackQuery):
     """
-    Показывает клавиатуру со статусами заказа.
-    :param callback: CallbackQuery от админа.
-    """
+    Displays a keyboard with order statuses.
+    :param callback: Admin's CallbackQuery.
+	"""
     message = callback.message
     # Пример извлечения id заказа из текста сообщения
     order_id = int(message.text.split("#")[1].split()[0])
@@ -74,8 +74,8 @@ async def change_order_status_menu(callback: CallbackQuery):
 @admin_only
 async def set_order_status(callback: CallbackQuery, state: FSMContext):
     """
-    Сохраняет выбранный статус заказа, уведомляет клиента, возвращает на детали заказа.
-    """
+    Saves the selected order status, notifies the customer, and returns to the order details.
+	"""
     _, order_id, new_status = callback.data.split(":")
     order_id = int(order_id)
     order = await Order.get_or_none(id=order_id).prefetch_related("user")

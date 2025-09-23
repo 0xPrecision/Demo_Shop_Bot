@@ -15,8 +15,8 @@ router = Router()
 @admin_only
 async def start_search_product(callback: CallbackQuery, state: FSMContext):
     """
-    Запускает FSM поиска товара.
-    """
+    Starts the FSM for product search.
+	"""
     msg = await callback.message.edit_text("🔍 Введите название товара или его ID для поиска:")
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(ProductSearchStates.waiting_query)
@@ -27,8 +27,8 @@ async def start_search_product(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def search_product_query(message: Message, state: FSMContext):
     """
-    Ищет товар по введённому тексту или ID.
-    """
+    Searches for a product by the entered text or ID.
+	"""
     await delete_request_and_user_message(message, state)
     query = message.text.strip()
     # Сначала пробуем как ID

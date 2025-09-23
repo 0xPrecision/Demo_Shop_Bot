@@ -16,9 +16,9 @@ router = Router()
 @admin_only
 async def start_add_category(callback: CallbackQuery, state: FSMContext):
     """
-    Запускает процесс добавления новой категории.
-    Просит ввести название новой категории.
-    """
+    Starts the process of adding a new category.
+    Prompts the user to enter the category name.
+	"""
     cur_state = await state.get_state()
     cur_data = await state.get_data()
     await state.update_data(
@@ -35,8 +35,8 @@ async def start_add_category(callback: CallbackQuery, state: FSMContext):
 @admin_only
 async def add_category_name(message: Message, state: FSMContext):
     """
-    Обрабатывает название новой категории, сохраняет её в базу.
-    """
+    Handles the name of a new category and saves it to the database.
+	"""
     await delete_request_and_user_message(message, state)
     name = message.text.strip()
     if not name:
