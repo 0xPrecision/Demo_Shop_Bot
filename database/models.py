@@ -20,6 +20,15 @@ class User(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     is_active = fields.BooleanField(default=True)
 
+class UserLocale(Model):
+    """
+    One-to-one to User. PK = user_id.
+    """
+    user: fields.OneToOneRelation[User] = fields.OneToOneField(
+        'models.User', pk=True, related_name='locale_pref', on_delete=fields.RESTRICT
+    )
+    locale = fields.CharField(max_length=8)
+
 class Product(Model):
     """
     Product model.
@@ -110,4 +119,6 @@ class Cart(Model):
     user = fields.ForeignKeyField('models.User', related_name='cart')
     product = fields.ForeignKeyField('models.Product', related_name='+')
     quantity = fields.IntField()
+
+
 

@@ -1,6 +1,5 @@
 from decimal import Decimal
 from typing import Union
-
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
@@ -11,26 +10,22 @@ from database.models import Category
 from .admin_access import admin_only
 from ...utils.admin_utils.catalog_utils import filter_or_change_pr_category
 from ...utils.common_utils import delete_request_and_user_message, format_price
-
-
 router = Router()
 
-
-@router.callback_query(F.data == "admin_add_product")
+@router.callback_query(F.data == 'admin_add_product')
 @admin_only
-async def start_add_product(callback: CallbackQuery, state: FSMContext):
+async def start_add_product(callback: CallbackQuery, t, state: FSMContext, **_):
     """
     Start the FSM for adding a product (step 1: name).
 	"""
-    msg = await callback.message.edit_text("Введите название товара:", reply_markup=back_menu())
+    msg = await callback.message.edit_text(t('add_product.messages.vvedite-nazvanie-tovara'), reply_markup=back_menu(t))
     await state.set_state(AddProductStates.waiting_name)
     await state.update_data(main_message_id=msg.message_id)
     await callback.answer()
 
-
 @router.message(AddProductStates.waiting_name)
 @admin_only
-async def add_product_name(message: Message, state: FSMContext):
+async def add_product_name(message: Message, t, state: FSMContext, **_):
     """
     Step 1. Get the product name.
 	"""
@@ -38,58 +33,53 @@ async def add_product_name(message: Message, state: FSMContext):
     name = message.text.strip()
     if not name:
         await delete_request_and_user_message(message, state)
-        msg = await message.answer("Название не может быть пустым. Введите ещё раз:")
+        msg = await message.answer(t('add_product.messages.nazvanie-ne-mozhet-byt'))
         await state.update_data(main_message_id=msg.message_id)
         return
     await state.update_data(name=name)
-    msg = await message.answer("Введите цену товара (только число):", reply_markup=back_menu())
+    msg = await message.answer(t('add_product.messages.vvedite-cenu-tovara-tolko'), reply_markup=back_menu(t))
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(AddProductStates.waiting_price)
 
-
 @router.message(AddProductStates.waiting_price)
 @admin_only
-async def add_product_price(message: Message, state: FSMContext):
+async def add_product_price(message: Message, t, state: FSMContext, **_):
     """
     Step 2. Get the product price.
 	"""
     await delete_request_and_user_message(message, state)
-    price_text = message.text.replace(",", ".").strip()
+    price_text = message.text.replace(',', '.').strip()
     try:
         price = float(price_text)
         if price <= 0:
             raise ValueError
     except ValueError:
-        msg = await message.answer("Некорректная цена. Введите только положительное число:")
+        msg = await message.answer(t('add_product.messages.nekorrektnaya-cena-vvedite-tolko'))
         await state.update_data(main_message_id=msg.message_id)
         return
     await state.update_data(price=price)
-    msg = await message.answer("Введите описание товара (или '-' чтобы пропустить):",
-                         reply_markup=back_menu())
+    msg = await message.answer(t('add_product.messages.vvedite-opisanie-tovara-ili'), reply_markup=back_menu(t))
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(AddProductStates.waiting_description)
 
-
 @router.message(AddProductStates.waiting_description)
 @admin_only
-async def add_product_description(message: Message, state: FSMContext):
+async def add_product_description(message: Message, t, state: FSMContext, **_):
     """
     Step 3. Get the product description.
 	"""
     await delete_request_and_user_message(message, state)
     description = message.text.strip()
-    if description == "-":
-        description = ""
+    if description == '-':
+        description = ''
     await state.update_data(description=description)
-    msg = await message.answer("Введите количество товара:",
-                               reply_markup=back_menu())
+    msg = await message.answer(t('add_product.messages.vvedite-kolichestvo-tovara'), reply_markup=back_menu(t))
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(AddProductStates.waiting_stock)
 
-
 @router.message(AddProductStates.waiting_stock)
 @admin_only
-async def add_product_stock(message: Message, state: FSMContext):
+async def add_product_stock(message: Message, t, state: FSMContext, **_):
     """
     Step 4. Get the product stock.
 	"""
@@ -99,64 +89,58 @@ async def add_product_stock(message: Message, state: FSMContext):
         if stock < 0:
             raise ValueError
     except ValueError:
-        msg = await message.answer("Некорректный остаток. Введите целое неотрицательное число:")
+        msg = await message.answer(t('add_product.messages.nekorrektnyj-ostatok-vvedite-celoe'))
         await state.update_data(main_message_id=msg.message_id)
         return
     await state.update_data(stock=stock)
-    msg = await message.answer("Отправьте фото товара (или '-' чтобы пропустить):",
-                         reply_markup=back_menu())
+    msg = await message.answer(t('add_product.messages.otpravte-foto-tovara-ili'), reply_markup=back_menu(t))
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(AddProductStates.waiting_photo)
 
-
 @router.message(AddProductStates.waiting_photo, F.photo)
 @admin_only
-async def add_product_photo(message: Message, state: FSMContext):
+async def add_product_photo(message: Message, state: FSMContext, t):
     """
     Step 5. Get the product photo.
 	"""
     await delete_request_and_user_message(message, state)
-    photo = message.photo[-1].file_id  # Берём максимальное качество
+    photo = message.photo[-1].file_id
     await state.update_data(photo=photo)
-    text = "Выберите категорию для товара:"
+    text = t('vyberete-kategoriu-tovara')
     await filter_or_change_pr_category(message, state, text)
     await state.set_state(AddProductStates.waiting_category)
 
-
 @router.message(AddProductStates.waiting_photo)
 @admin_only
-async def add_product_photo_skip(message: Message, state: FSMContext):
+async def add_product_photo_skip(message: Message, t, state: FSMContext, **_):
     """
     Step 5. Skip adding a photo.
 	"""
     await delete_request_and_user_message(message, state)
-    if message.text.strip() != "-":
-        msg = await message.answer("Пожалуйста, отправьте фото товара или введите '-' для пропуска.")
+    if message.text.strip() != '-':
+        msg = await message.answer(t('add_product.messages.otpravte-foto-tovara-ili.2'))
         await state.update_data(main_message_id=msg.message_id)
         return
-
     await state.update_data(photo=None)
-    text = "Выберите категорию для товара:"
+    text = t('vyberete-kategoriu-tovara')
     await filter_or_change_pr_category(message, state, text)
     await state.set_state(AddProductStates.waiting_category)
 
-
-@router.callback_query(F.data.startswith("admin_edit_category:"))
+@router.callback_query(F.data.startswith('admin_edit_category:'))
 @admin_only
-async def admin_edit_category(callback: CallbackQuery, state: FSMContext):
+async def admin_edit_category(callback: CallbackQuery, state: FSMContext, t):
     """
     Displays a keyboard for changing the category of the selected product.
 	"""
-    product_id = int(callback.data.split(":")[1])
-    text = "Выберите новую категорию для товара:"
-    await filter_or_change_pr_category(callback, state, text, product_id)
+    product_id = int(callback.data.split(':')[1])
+    text = t("vyberete-novuyu-kategoriu-tovara")
+    await filter_or_change_pr_category(callback, state, t, text, product_id)
     await callback.answer()
-
 
 @router.callback_query(AddProductStates.waiting_category)
 @router.message(AddProductStates.waiting_category)
 @admin_only
-async def add_product_category(event: Union[CallbackQuery, Message], state: FSMContext):
+async def add_product_category(event: Union[CallbackQuery, Message], t, state: FSMContext, **_):
     """
     Step 6. Get the product category and perform the final confirmation.
 	"""
@@ -172,59 +156,49 @@ async def add_product_category(event: Union[CallbackQuery, Message], state: FSMC
             message_obj = event.message
         else:
             message_obj = event
-
     elif isinstance(event, CallbackQuery):
-        if event.data.startswith("change_category:"):
-            category_id = int(event.data.split(":", 1)[1])
+        if event.data.startswith('change_category:'):
+            category_id = int(event.data.split(':', 1)[1])
             category = await Category.get(id=category_id)
-
         else:
-            await event.answer("Ошибка. Некорректная категория.", show_alert=True)
+            await event.answer(t('add_product.messages.nekorrektnaya-kategoriya'), show_alert=True)
             return
         await event.answer()
         message_obj = event.message
-
     elif isinstance(event, Message):
         name = event.text.strip()
         category = await get_category_by_name(name)
         category_id = category.id
         message_obj = event
-
     else:
         return
-
     await state.update_data(category_id=category_id)
-    text = (
-        f"<b>Проверьте данные товара:</b>\n\n"
-        f"Название: <b>{data.get('name')}</b>\n"
-        f"Цена: <b>{format_price(data.get('price'))}</b>₽\n"
-        f"Описание: {data.get('description') or '-'}\n"
-        f"Остаток: <b>{data.get('stock')}</b>\n"
-        f"Категория: <b>{category}</b>\n"
-        f"Фото: {'✅' if data.get('photo') else '-'}\n\n"
-        f"Создать этот товар?"
-    )
-    await message_obj.answer(text, reply_markup=create_or_cancel_product_kb())
+
+    name = data.get('name')
+    price = format_price(data.get('price'))
+    descr = data.get('description')
+    stock = data.get('stock')
+    img = ('✅' if data.get('photo') else '-')
+
+    text = t("add_product.dannye-tovara".format(name=name,
+                                                price=price,
+                                                descr=descr,
+                                                stock=stock,
+                                                category=category,
+                                                img=img))
+
+    await message_obj.answer(text, reply_markup=create_or_cancel_product_kb(t))
     await state.set_state(AddProductStates.confirming)
 
-
-@router.callback_query(AddProductStates.confirming, F.data == "admin_create_product")
+@router.callback_query(AddProductStates.confirming, F.data == 'admin_create_product')
 @admin_only
-async def confirm_create_product(callback: CallbackQuery, state: FSMContext):
+async def confirm_create_product(callback: CallbackQuery, t, state: FSMContext, **_):
     """
     Final step — create the product in the database.
 	"""
     data = await state.get_data()
     category = await Category.get(id=data['category_id'])
-    await create_product(
-        name=data['name'],
-        description=data['description'],
-        price=Decimal(data['price']),
-        stock=data['stock'],
-        category=category,
-        photo=data['photo'],
-        is_active=True
-    )
-    await callback.message.edit_text("Товар успешно создан ✅", reply_markup=back_menu())
+    await create_product(name=data['name'], description=data['description'], price=Decimal(data['price']), stock=data['stock'], category=category, photo=data['photo'], is_active=True)
+    await callback.message.edit_text(t('add_product.messages.tovar-uspeshno-sozdan'), reply_markup=back_menu(t))
     await state.clear()
     await callback.answer()

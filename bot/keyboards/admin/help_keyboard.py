@@ -1,13 +1,4 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-
-def help_keyboard():
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="🛒 Каталог", callback_data="admin_catalog")],
-            [InlineKeyboardButton(text="📦 Заказы", callback_data="admin_orders")],
-            [InlineKeyboardButton(text="➕ Добавить товар", callback_data="admin_add_product")],
-            [InlineKeyboardButton(text="➕ Добавить категорию", callback_data="admin_add_category")],
-            [InlineKeyboardButton(text="🏠 Главное меню", callback_data="/start_admin")]
-        ]
-    )
+def help_keyboard(t, **_):
+    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=t('help_keyboard.buttons.katalog'), callback_data='admin_catalog')], [InlineKeyboardButton(text=t('help_keyboard.buttons.zakazy'), callback_data='admin_orders')], [InlineKeyboardButton(text=t('catalog_keyboards.buttons.dobavit-tovar'), callback_data='admin_add_product')], [InlineKeyboardButton(text=t('catalog_keyboards.buttons.dobavit-kategoriyu'), callback_data='admin_add_category')], [InlineKeyboardButton(text=t('help_keyboard.buttons.glavnoe-menyu'), callback_data='/start_admin')]])

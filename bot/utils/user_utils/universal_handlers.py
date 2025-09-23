@@ -1,7 +1,6 @@
 from aiogram import Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
-
 from bot.handlers.user_handlers.user_catalog import show_categories
 from bot.keyboards.user.user_main_menu import main_menu
 from bot.states.user_states.order_states import OrderStates
@@ -12,12 +11,8 @@ from bot.utils.user_utils.user_profile_utils import show_profile_summary
 from bot.utils.user_utils.validators import validate_name, format_name, validate_phone, validate_address
 from bot.utils.user_utils.user_common_utils import send_step_and_cleanup, validation_process_name, validation_process_phone, validation_process_address
 from bot.utils.common_utils import delete_request_and_user_message
-
 from database.crud import create_user_profile
-
-
 router = Router()
-
 
 async def universal_name_handler(message: Message, state: FSMContext) -> None:
     """
@@ -26,29 +21,18 @@ async def universal_name_handler(message: Message, state: FSMContext) -> None:
 	"""
     await delete_request_and_user_message(message, state)
     name = message.text
-
     if not validate_name(name):
         await validation_process_name(message, state)
         return
-
     name = format_name(name)
     await state.update_data(name=name)
     state_name = await state.get_state()
-
-    text = (
-        "Пожалуйста, заполните данные.\n\n"
-        f"✅ ФИО: {name}\n"
-        "2️⃣ Телефон (только цифры):"
-    )
-
+    text = f'Пожалуйста, заполните данные.\n\n✅ ФИО: {name}\n2️⃣ Телефон (только цифры):'
     await send_step_and_cleanup(message, text, state, reply_markup=cart_back_menu())
-
     if state_name == OrderStates.waiting_for_name.state:
         await state.set_state(OrderStates.waiting_for_phone)
-
     elif state_name == ProfileStates.waiting_for_name.state:
         await state.set_state(ProfileStates.waiting_for_phone)
-
 
 async def universal_phone_handler(message: Message, state: FSMContext) -> None:
     """
@@ -60,29 +44,16 @@ async def universal_phone_handler(message: Message, state: FSMContext) -> None:
     if not validate_phone(phone):
         await validation_process_phone(message, state)
         return
-
     await state.update_data(phone=phone)
     data = await state.get_data()
     name = data.get('name', '-')
     state_name = await state.get_state()
-
     if state_name == OrderStates.waiting_for_phone.state:
-        text = (
-            "Пожалуйста, заполните данные.\n\n"
-            f"✅ ФИО: {name}\n"
-            f"✅ Телефон: {phone}\n"
-            "3️⃣ Комментарий к заказу (или «-» (без кавычек), чтобы пропустить):"
-        )
+        text = f'Пожалуйста, заполните данные.\n\n✅ ФИО: {name}\n✅ Телефон: {phone}\n3️⃣ Комментарий к заказу (или «-» (без кавычек), чтобы пропустить):'
         await send_step_and_cleanup(message, text, state, reply_markup=cart_back_menu())
         await state.set_state(OrderStates.waiting_for_comment)
-
     elif state_name == ProfileStates.waiting_for_phone.state:
-        text = (
-            "Пожалуйста, заполните данные профиля.\n\n"
-            f"✅ ФИО: {name}\n"
-            f"✅ Телефон: {phone}\n"
-            "3️⃣ Адрес доставки (пример: г. Москва, ул. Ленина, д. 15):"
-        )
+        text = f'Пожалуйста, заполните данные профиля.\n\n✅ ФИО: {name}\n✅ Телефон: {phone}\n3️⃣ Адрес доставки (пример: г. Москва, ул. Ленина, д. 15):'
         await send_step_and_cleanup(message, text, state, reply_markup=cart_back_menu())
         await state.set_state(ProfileStates.waiting_for_address)
 
@@ -96,27 +67,17 @@ async def universal_address_handler(message: Message, state: FSMContext) -> None
     if not validate_address(address):
         await validation_process_address(message, state)
         return
-
     await state.update_data(address=address)
     data = await state.get_data()
-
     state_name = await state.get_state()
-
     if state_name == OrderStates.waiting_for_address.state:
         await show_order_summary(message, state)
-
     elif state_name == ProfileStates.waiting_for_address.state:
         user_id = message.from_user.id
-        await create_user_profile(
-            user_id=user_id,
-            name=data.get("name", ""),
-            phone=data.get("phone", ""),
-            address=address
-        )
+        await create_user_profile(user_id=user_id, name=data.get('name', ''), phone=data.get('phone', ''), address=address)
         await show_profile_summary(message, state, user_id)
 
-
-async def universal_exit(callback: CallbackQuery, state: FSMContext):
+async def universal_exit(callback: CallbackQuery, t, state: FSMContext, **_):
     """
     Universal function to exit the current scenario (checkout, etc.).
     Clears previous messages and resets the FSM state.
@@ -125,12 +86,9 @@ async def universal_exit(callback: CallbackQuery, state: FSMContext):
     :param state: FSM context.
 	"""
     await delete_request_and_user_message(callback.message, state)
-    if callback.data == "menu_catalog":
+    if callback.data == 'menu_catalog':
         await show_categories(callback)
-    elif callback.data == "menu_main":
-        await callback.message.answer(
-            "Вы вернулись в главное меню:",
-            reply_markup=main_menu()
-        )
+    elif callback.data == 'menu_main':
+        await callback.message.answer(t('universal_handlers.messages.vy-vernulis-v-glavnoe'), reply_markup=main_menu())
     await state.clear()
     await callback.answer()
