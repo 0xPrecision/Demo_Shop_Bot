@@ -52,6 +52,13 @@ class Product(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     category = fields.ForeignKeyField("models.Category", related_name="products", null=True)
 
+    @property
+    def status_key(self) -> str:
+        return "product.status.active" if self.is_active else "product.status.archived"
+
+    def status_label(self, t) -> str:
+        return t(self.status_key)
+
 class Category(Model):
     """
     Product category model.
@@ -83,7 +90,7 @@ class Order(Model):
     name = fields.CharField(max_length=128, null=True)
     phone = fields.CharField(max_length=20, null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
-    status = fields.CharField(max_length=32, default='В работе')
+    status = fields.CharField(max_length=32, default='In progress')
     total_price = fields.DecimalField(max_digits=10, decimal_places=2, default=0)
     payment_method = fields.CharField(max_length=64, null=True)
     delivery_method = fields.CharField(max_length=64, null=True)

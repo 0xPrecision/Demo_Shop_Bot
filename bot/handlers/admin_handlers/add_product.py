@@ -4,12 +4,14 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from database.crud import create_product, get_category_by_name
-from bot.keyboards.admin.catalog_keyboards import create_or_cancel_product_kb, back_menu
+from bot.keyboards.admin.catalog_keyboards import create_or_cancel_product_kb, back_menu, admin_ask_new_product
 from bot.states.admin_states.product_states import AddProductStates
 from database.models import Category
 from .admin_access import admin_only
 from ...utils.admin_utils.catalog_utils import filter_or_change_pr_category
 from ...utils.common_utils import delete_request_and_user_message, format_price
+
+
 router = Router()
 
 @router.callback_query(F.data == 'admin_add_product')
@@ -107,7 +109,7 @@ async def add_product_photo(message: Message, state: FSMContext, t):
     photo = message.photo[-1].file_id
     await state.update_data(photo=photo)
     text = t('vyberete-kategoriu-tovara')
-    await filter_or_change_pr_category(message, state, text)
+    await filter_or_change_pr_category(message, state, t, text)
     await state.set_state(AddProductStates.waiting_category)
 
 @router.message(AddProductStates.waiting_photo)
@@ -123,7 +125,7 @@ async def add_product_photo_skip(message: Message, t, state: FSMContext, **_):
         return
     await state.update_data(photo=None)
     text = t('vyberete-kategoriu-tovara')
-    await filter_or_change_pr_category(message, state, text)
+    await filter_or_change_pr_category(message, state, t, text)
     await state.set_state(AddProductStates.waiting_category)
 
 @router.callback_query(F.data.startswith('admin_edit_category:'))
@@ -140,7 +142,7 @@ async def admin_edit_category(callback: CallbackQuery, state: FSMContext, t):
 @router.callback_query(AddProductStates.waiting_category)
 @router.message(AddProductStates.waiting_category)
 @admin_only
-async def add_product_category(event: Union[CallbackQuery, Message], t, state: FSMContext, **_):
+async def add_product_category(event: Union[CallbackQuery, Message], state: FSMContext, t, **_):
     """
     Step 6. Get the product category and perform the final confirmation.
 	"""
@@ -176,16 +178,16 @@ async def add_product_category(event: Union[CallbackQuery, Message], t, state: F
 
     name = data.get('name')
     price = format_price(data.get('price'))
-    descr = data.get('description')
+    descr = data.get('description') if data.get('description') else "-"
     stock = data.get('stock')
     img = ('✅' if data.get('photo') else '-')
 
-    text = t("add_product.dannye-tovara".format(name=name,
+    text = t("add_product.dannye-tovara").format(name=name,
                                                 price=price,
                                                 descr=descr,
                                                 stock=stock,
                                                 category=category,
-                                                img=img))
+                                                img=img)
 
     await message_obj.answer(text, reply_markup=create_or_cancel_product_kb(t))
     await state.set_state(AddProductStates.confirming)
@@ -199,6 +201,6 @@ async def confirm_create_product(callback: CallbackQuery, t, state: FSMContext, 
     data = await state.get_data()
     category = await Category.get(id=data['category_id'])
     await create_product(name=data['name'], description=data['description'], price=Decimal(data['price']), stock=data['stock'], category=category, photo=data['photo'], is_active=True)
-    await callback.message.edit_text(t('add_product.messages.tovar-uspeshno-sozdan'), reply_markup=back_menu(t))
+    await callback.message.edit_text(t('add_product.messages.tovar-uspeshno-sozdan'), reply_markup=admin_ask_new_product(t))
     await state.clear()
     await callback.answer()

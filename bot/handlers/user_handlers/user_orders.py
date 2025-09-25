@@ -5,22 +5,23 @@ from bot.utils.user_utils.user_orders_utils import show_orders_menu, get_order_d
 router = Router()
 
 @router.callback_query(F.data == 'menu_orders')
-async def show_history_orders_menu(callback: CallbackQuery, state: FSMContext) -> None:
+async def show_history_orders_menu(callback: CallbackQuery, state: FSMContext, t) -> None:
     """
     Handler for displaying the user's orders menu.
 	"""
     text = t('user_orders.misc.u-vas-poka-net')
-    await show_orders_menu(callback, state, text)
+    await show_orders_menu(callback, t, state, text)
     await callback.answer()
 
 @router.callback_query(F.data == 'active_orders')
-async def show_active_orders_menu(callback: CallbackQuery, state: FSMContext):
+async def show_active_orders_menu(callback: CallbackQuery, state: FSMContext, t):
     text = t('user_orders.misc.u-vas-net-tekuschih')
-    await show_orders_menu(callback, state, text, order_status='В работе')
+    order_statuses = [t("order.status.in_progress"), t("order.status.pending"), t("order.status.shipped")]
+    await show_orders_menu(callback, t, state, text, order_status=order_statuses)
     await callback.answer()
 
 @router.callback_query(F.data.startswith('order_details_'))
-async def show_order_details(callback: CallbackQuery):
+async def show_order_details(callback: CallbackQuery, t):
     order_id = int(callback.data.split('_')[2])
-    details = await get_order_details(order_id)
+    details = await get_order_details(order_id, t)
     await callback.message.edit_text(details['text'], reply_markup=details['keyboard'])

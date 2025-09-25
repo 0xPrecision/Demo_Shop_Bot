@@ -1,7 +1,7 @@
 ORDER_STATUSES = [
-    ("pending", "🕓 Принят"),
-    ("processing", "🔧 В обработке"),
-    ("shipped", "🚚 Отправлен"),
-    ("done", "✅ Завершён"),
-    ("cancelled", "❌ Отменён"),
+    ("pending", "order.status.pending"),
+    ("processing", "order.status.in_progress"),
+    ("shipped", "order.status.shipped"),
+    ("done", "order.status.done"),
+    ("cancelled", "order.status.canceled"),
 ]

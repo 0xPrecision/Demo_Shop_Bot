@@ -35,11 +35,15 @@ async def build_cart_view(cart_items: List[Cart], t, page: int=0, **_) -> Tuple[
         text = t('user_cart_utils.misc.b-vasha-korzina-b')
         for item, product in cart_pairs:
             product_price = product.price * item.quantity
-            text += f'<b>{product.name}</b>\n'
-            text += f'  └ {item.quantity} × {format_price(product.price)} ₽ = {format_price(product_price)} ₽\n'
-        text += f'\n<b>Итого:</b> <u>{format_price(total)} ₽</u>'
+            text += t("cart.item_line").format(
+                name=product.name,
+                qty=item.quantity,
+                unit_price=format_price(product.price),
+                total=format_price(product_price)
+            )
+        text += t("cart.total").format(total=format_price(total))
         page_products, total_pages, _ = paginate(cart_pairs, page, PAGE_SIZE)
-        keyboard = cart_keyboard(page_products, page, total_pages)
-        return (text, keyboard)
+        keyboard = cart_keyboard(page_products, page, total_pages, t)
+        return text, keyboard
     else:
-        return (t('user_cart.messages.vasha-korzina-pusta'), cart_back_menu())
+        return t('user_cart.messages.vasha-korzina-pusta'), cart_back_menu(t)

@@ -16,9 +16,9 @@ async def show_categories(callback: CallbackQuery, t, **_) -> None:
     products = await get_all_products()
     categories = sorted({p.category.name for p in products if p.category is not None})
     if not categories:
-        await callback.message.answer(t('user_catalog.messages.kategorii-ne-najdeny'), reply_markup=main_menu())
+        await callback.message.answer(t('user_catalog.messages.kategorii-ne-najdeny'), reply_markup=main_menu(t))
         return
-    await callback.message.answer(t('user_catalog.messages.vyberite-kategoriyu'), reply_markup=show_categories_keyboard(categories))
+    await callback.message.answer(t('user_catalog.messages.vyberite-kategoriyu'), reply_markup=show_categories_keyboard(categories, t))
 
 @router.callback_query(F.data.startswith('category_'))
 async def show_products_in_category(callback: CallbackQuery, t, state: FSMContext, **_) -> None:
@@ -32,14 +32,16 @@ async def show_products_in_category(callback: CallbackQuery, t, state: FSMContex
     all_products = await get_all_products()
     category_products = [p for p in all_products if p.category and p.category.name == category_name]
     if not category_products:
-        await callback.message.edit_text(t('user_catalog.messages.v-etoj-kategorii-poka'), reply_markup=main_menu())
+        await callback.message.edit_text(t('user_catalog.messages.v-etoj-kategorii-poka'), reply_markup=main_menu(t))
         await callback.answer()
         return
     page_products, total_pages, current_page = paginate(category_products, page, PAGE_SIZE)
-    text = f'<b>🛍Товары в категории «{category_name}»</b>\n'
-    text += '-' * 42
-    text += '\n\nЧтобы узнать подробнее о товаре, нажмите на его название.'
-    markup = products_keyboard(page_products, category_name, current_page, total_pages)
+    text = (
+            t("category.header").format(category_name=category_name)
+            + t("category.separator")
+            + t("category.hint")
+    )
+    markup = products_keyboard(page_products, category_name, current_page, total_pages, t)
     msg = await callback.message.answer(text, reply_markup=markup)
     await state.update_data(main_message_id=msg.message_id)
     await callback.answer()
@@ -59,13 +61,37 @@ async def show_product_info(callback: CallbackQuery, t, **_):
     except (IndexError, ValueError):
         await callback.answer(t('user_catalog.messages.nekorrektnyj-tovar'), show_alert=True)
         return
+
     product = await Product.get_or_none(id=product_id)
+
     if not product:
         await callback.answer(t('admin_catalog.messages.tovar-ne-najden'), show_alert=True)
         return
+
+    caption = (
+        t("product.card.caption")
+        .format(
+            name=product.name,
+            price=format_price(product.price),
+            currency="₽",
+            description=product.description or t("product.card.no_description")
+        )
+    )
+    kb = show_product_info_kb(product.id, source, t, category_name, page)
+
     if product.photo:
         await callback.message.delete()
-        await callback.bot.send_photo(chat_id=callback.message.chat.id, photo=product.photo, caption=f"<b>{product.name}</b>\nЦена: {format_price(product.price)} ₽\nОписание: {product.description or 'Нет описания.'}", reply_markup=show_product_info_kb(product.id, source, category_name, page))
+        await callback.bot.send_photo(
+            chat_id=callback.message.chat.id,
+            photo=product.photo,
+            caption=caption,
+            reply_markup=kb
+        )
+
     else:
-        await callback.message.edit_text(text=f"<b>{product.name}</b>\nЦена: {format_price(product.price)} ₽\nОписание: {product.description or 'Нет описания.'}", reply_markup=show_product_info_kb(product.id, source, category_name, page))
+        await callback.message.edit_text(
+            text=caption,
+            reply_markup=kb
+        )
+
     await callback.answer()

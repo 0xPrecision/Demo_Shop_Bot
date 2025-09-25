@@ -2,7 +2,8 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from database.crud import get_product_by_id, update_product, get_all_categories
-from bot.keyboards.admin.catalog_keyboards import product_edit_field_keyboard, create_or_cancel_edit_product_kb, change_category_keyboard, back_menu
+from bot.keyboards.admin.catalog_keyboards import product_edit_field_keyboard, create_or_cancel_edit_product_kb, \
+    change_category_keyboard, admin_catalog_menu_keyboard
 from database.models import Category
 from .admin_access import admin_only
 from ...states.admin_states.product_states import EditProductStates
@@ -19,8 +20,8 @@ async def edit_product_start(callback: CallbackQuery, t, state: FSMContext, **_)
     product_id = int(callback.data.split(':')[1])
     product = await get_product_by_id(product_id)
     await state.update_data(edit_product_id=product_id, edit_fields={})
-    await show_edit_product_summary(callback.message, product, state)
-    msg = await callback.message.answer(t('edit_product.messages.chto-hotite-izmenit'), reply_markup=product_edit_field_keyboard(product_id))
+    await show_edit_product_summary(callback.message, product, state, t)
+    msg = await callback.message.answer(t('edit_product.messages.chto-hotite-izmenit'), reply_markup=product_edit_field_keyboard(product_id, t))
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(EditProductStates.choosing_field)
     await callback.answer()
@@ -48,13 +49,21 @@ async def choose_edit_field(callback: CallbackQuery, t, state: FSMContext, **_):
         product_id = data.get('edit_product_id')
         product = await get_product_by_id(product_id)
         edit_fields = data.get('edit_fields', {})
-        await show_edit_product_summary(callback.message, product, state, edit_fields)
-        msg = await callback.message.answer(t('edit_product.messages.podtverdit-izmeneniya'), reply_markup=create_or_cancel_edit_product_kb())
+        await show_edit_product_summary(callback.message, product, state, t, edit_fields)
+        msg = await callback.message.answer(t('edit_product.messages.podtverdit-izmeneniya'), reply_markup=create_or_cancel_edit_product_kb(t))
         await state.update_data(main_message_id=msg.message_id)
         await state.set_state(EditProductStates.confirming)
     else:
-        field_names = {'name': 'новое название', 'price': 'новую цену', 'description': 'новое описание', 'stock': 'новый остаток'}
-        msg = await callback.message.answer(f'Введите {field_names[field]} товара:')
+        field_labels = {
+            "name": t("product.fields.name"),
+            "price": t("product.fields.price"),
+            "description": t("product.fields.description"),
+            "stock": t("product.fields.stock"),
+        }
+
+        msg = await callback.message.answer(
+            t("product.prompt").format(field=field_labels[field])
+        )
         await state.update_data(main_message_id=msg.message_id)
         await state.set_state(EditProductStates.editing_field)
     await callback.answer()
@@ -102,8 +111,8 @@ async def process_edit_field(message: Message, t, state: FSMContext, **_):
     await state.update_data(edit_fields=edit_fields)
     product_id = data.get('edit_product_id')
     product = await get_product_by_id(product_id)
-    await show_edit_product_summary(message, product, state, edit_fields)
-    msg = await message.answer(t('edit_product.messages.chto-hotite-izmenit-dalshe'), reply_markup=product_edit_field_keyboard(product_id))
+    await show_edit_product_summary(message, product, state, t, edit_fields)
+    msg = await message.answer(t('edit_product.messages.chto-hotite-izmenit-dalshe'), reply_markup=product_edit_field_keyboard(product_id, t))
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(EditProductStates.choosing_field)
 
@@ -121,8 +130,8 @@ async def edit_category_callback(callback: CallbackQuery, t, state: FSMContext, 
     await state.update_data(edit_fields=edit_fields)
     product_id = data.get('edit_product_id')
     product = await get_product_by_id(product_id)
-    await show_edit_product_summary(callback.message, product, state, edit_fields)
-    msg = await callback.message.answer(t('edit_product.messages.chto-hotite-izmenit-dalshe'), reply_markup=product_edit_field_keyboard(product_id))
+    await show_edit_product_summary(callback.message, product, state, t, edit_fields)
+    msg = await callback.message.answer(t('edit_product.messages.chto-hotite-izmenit-dalshe'), reply_markup=product_edit_field_keyboard(product_id, t))
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(EditProductStates.choosing_field)
     await callback.answer()
@@ -145,13 +154,13 @@ async def save_product_edits(callback: CallbackQuery, t, state: FSMContext, **_)
         edit_fields['category'] = category_obj
         del edit_fields['category_id']
     await update_product(product_id, **edit_fields)
-    msg = await callback.message.answer(t('edit_product.messages.izmeneniya-uspeshno-sohraneny'), reply_markup=back_menu())
+    msg = await callback.message.answer(t('edit_product.messages.izmeneniya-uspeshno-sohraneny'), reply_markup=admin_catalog_menu_keyboard(t))
     await delete_summary(callback.message, state)
     await state.update_data(main_message_id=msg.message_id)
     await state.clear()
     await callback.answer()
 
-async def show_edit_product_summary(message_or_callback, product, state, edit_fields: dict=None):
+async def show_edit_product_summary(message_or_callback, product, state, t, edit_fields: dict=None):
     """
     Sends the product summary (including changes) with a photo (if any).
 	"""
@@ -169,7 +178,13 @@ async def show_edit_product_summary(message_or_callback, product, state, edit_fi
             pass
         else:
             data['category'] = '-'
-    text = f"<b>Товар:</b>\n<b>{data['name']}</b>\nЦена: {format_price(data['price'])}₽\nОписание: {data['description'] or '—'}\nОстаток: {data['stock']}\nКатегория: {data['category']}\n"
+
+    text = t('admin_catalog.misc.b-tovar-b-b-b-ostatok-kategoriya').format(product_name=data['name'],
+                                                                           pr_category=data['category'],
+                                                                           description=data['description'] or '—',
+                                                                           price=format_price(data['price']),
+                                                                           currency="₽",
+                                                                           stock=data['stock'])
     if data.get('photo'):
         try:
             msg = await message_or_callback.bot.send_photo(chat_id=message_or_callback.chat.id, photo=data['photo'], caption=text)

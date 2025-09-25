@@ -22,10 +22,10 @@ async def admin_panel_open(event: Message | CallbackQuery, t, state: FSMContext,
         msg = event
         edit = False
     if edit:
-        await msg.edit_text(t('admin_common.messages.admin-panel-vyberite-dejstvie'), reply_markup=admin_main_menu())
+        await msg.edit_text(t('admin_common.messages.admin-panel-vyberite-dejstvie'), reply_markup=admin_main_menu(t))
         await event.answer()
     else:
-        await msg.answer(t('admin_common.messages.admin-panel-vyberite-dejstvie'), reply_markup=admin_main_menu())
+        await msg.answer(t('admin_common.messages.admin-panel-vyberite-dejstvie'), reply_markup=admin_main_menu(t))
 
 @router.message(F.text == '/start_admin')
 @admin_only

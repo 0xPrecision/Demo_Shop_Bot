@@ -36,7 +36,7 @@ async def add_category_name(message: Message, t, state: FSMContext, **_):
         await message.answer(t('add_category.messages.nazvanie-ne-mozhet-byt'))
         return
     category = await create_category(name=name)
-    text = t("kategoria-dobavlena".format(name=name))
+    text = t("kategoria-dobavlena").format(name=name)
     data = await state.get_data()
     draft_state = data.get('draft_state')
     draft_data = data.get('draft_data', {})
@@ -44,7 +44,7 @@ async def add_category_name(message: Message, t, state: FSMContext, **_):
         draft_data['category_id'] = category.id
         await state.set_state(draft_state)
         await state.update_data(**draft_data)
-        await add_product_category(message, state)
+        await add_product_category(message, state, t)
         return
     else:
         await message.answer(text, reply_markup=back_menu(t))

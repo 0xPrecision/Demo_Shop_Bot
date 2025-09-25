@@ -10,27 +10,27 @@ from bot.utils.user_utils.universal_handlers import universal_exit
 router = Router()
 
 @router.callback_query(lambda c: c.data in ['menu_main', 'menu_catalog'])
-async def universal_exit_handler(callback: CallbackQuery, state: FSMContext):
+async def universal_exit_handler(callback: CallbackQuery, state: FSMContext, t):
     """
     Universal handler for exiting any state via the “Main Menu” and “Catalog” buttons.
 	"""
-    await universal_exit(callback, state)
+    await universal_exit(callback, state, t)
 
 @router.callback_query(F.data.startswith('menu_'))
-async def menu_router(callback: CallbackQuery, state: FSMContext):
+async def menu_router(callback: CallbackQuery, state: FSMContext, t):
     """
     Routes clicks across the main menu sections.
 	"""
     action = callback.data.replace('menu_', '')
     await callback.message.delete()
     if action == 'catalog':
-        await show_categories(callback)
+        await show_categories(callback, t)
     elif action == 'cart':
-        await show_cart(callback, state)
+        await show_cart(callback, state, t)
     elif action == 'profile':
-        await show_profile_menu(callback)
+        await show_profile_menu(callback, t)
     elif action == 'help':
-        await help_cmd(callback, state)
+        await help_cmd(callback, state, t)
     await callback.answer()
 
 @router.message(F.text)

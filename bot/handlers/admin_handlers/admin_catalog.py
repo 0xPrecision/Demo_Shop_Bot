@@ -15,7 +15,7 @@ async def admin_catalog_menu(callback: CallbackQuery, t, **_):
     """
     Catalog main menu: choose between products and categories.
 	"""
-    await callback.message.edit_text(t('admin_catalog.messages.chto-vy-hotite-prosmotret-redaktirovat'), reply_markup=admin_catalog_menu_keyboard())
+    await callback.message.edit_text(t('admin_catalog.messages.chto-vy-hotite-prosmotret-redaktirovat'), reply_markup=admin_catalog_menu_keyboard(t))
     await callback.answer()
 
 @router.callback_query(F.data == 'admin_products')
@@ -38,19 +38,19 @@ async def admin_categories_entry(callback: CallbackQuery, state: FSMContext, t):
     Displays an inline keyboard for selecting a product category (filter).
 	"""
     text = t('admin_catalog.misc.kategorii-tovarov-vyberite-dlya')
-    await filter_or_change_pr_category(callback, state, text)
+    await filter_or_change_pr_category(callback, state, t, text)
     await callback.answer()
 
 @router.callback_query(F.data.startswith('admin_products_page:'))
 @admin_only
-async def admin_products_page(callback: CallbackQuery, state: FSMContext):
+async def admin_products_page(callback: CallbackQuery, state: FSMContext, t):
     """
     Paginates through catalog pages.
 	"""
     page = int(callback.data.split(':')[1])
-    text = f'🛒 <b>Товары</b> (стр. {page}):'
+    text = t('admin_catalog.misc.b-tovary-b-str').format(page=page)
     func = get_products_page(page)
-    await get_products_info(callback, page, text, func, state)
+    await get_products_info(callback, t, page, text, func, state)
     await callback.answer()
 
 @router.callback_query(F.data.startswith('admin_product_detail:'))
@@ -65,13 +65,23 @@ async def admin_product_detail(callback: CallbackQuery, t, state: FSMContext, **
     if not product:
         await callback.answer(t('admin_catalog.messages.tovar-ne-najden'), show_alert=True)
         return
-    text = f"<b>Товар:</b>\n<b>{product.name}</b>\nОстаток: {product.stock}\nКатегория: {(product.category.name if product.category else '—')}\nЦена: {format_price(product.price)}₽\nОписание: {product.description or '—'}"
+    product_name = product.name
+    stock = product.stock
+    category = product.category.name if product.category else '—'
+    pr_price = format_price(product.price)
+    pr_descr = product.description or '—'
+    text = t('admin_catalog.misc.b-tovar-b-b-b-ostatok-kategoriya').format(product_name=product_name,
+                                                                           pr_category=category,
+                                                                           description=pr_descr,
+                                                                           price=pr_price,
+                                                                           currency="₽",
+                                                                           stock=stock)
     if product.photo:
-        msg = await callback.message.answer_photo(photo=product.photo, caption=text, reply_markup=product_admin_keyboard(product_id))
+        msg = await callback.message.answer_photo(photo=product.photo, caption=text, reply_markup=await product_admin_keyboard(product_id, t))
         await callback.message.delete()
         await state.update_data(main_message_id=msg.message_id)
     else:
-        msg = await callback.message.edit_text(text=text, reply_markup=product_admin_keyboard(product_id))
+        msg = await callback.message.edit_text(text=text, reply_markup=await product_admin_keyboard(product_id, t))
         await state.update_data(main_message_id=msg.message_id)
     await callback.answer()
 
@@ -82,18 +92,18 @@ async def admin_products_by_category(callback: CallbackQuery, t, **_):
     Displays options for the selected category.
 	"""
     category_id = int(callback.data.split(':', 1)[1])
-    await callback.message.edit_text(t('admin_catalog.messages.vyberete-dejstvie'), reply_markup=show_products_or_edit_category(category_id))
+    await callback.message.edit_text(t('admin_catalog.messages.vyberete-dejstvie'), reply_markup=show_products_or_edit_category(category_id, t))
 
 @router.callback_query(F.data.startswith('admin_category_filter:'))
 @admin_only
-async def admin_products_by_category(callback: CallbackQuery, state: FSMContext):
+async def admin_products_by_category(callback: CallbackQuery, state: FSMContext, t):
     """
     Displays products from the selected category (admin filter).
 	"""
     category_id = int(callback.data.split(':', 1)[1])
     page = 1
     category = await Category.get(id=category_id)
-    text = f'🛒 <b>Товары категории: {category.name}</b>'
+    text = t('admin_catalog.misc.b-tovary-kategorii-b').format(name=category.name)
     func = get_products_page_by_category(category_id, page)
-    await get_products_info(callback, page, text, func, state)
+    await get_products_info(callback, t, page, text, func, state)
     await callback.answer()

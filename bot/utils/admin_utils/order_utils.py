@@ -26,9 +26,9 @@ async def show_orders(callback: CallbackQuery, t, page: int, text: str, **_):
     if not orders:
         await callback.answer(t('order_utils.messages.zakazov-poka-net'), show_alert=True)
         return
-    await callback.message.edit_text(text, reply_markup=orders_list_keyboard(orders_for_kb, page, has_next, has_prev))
+    await callback.message.edit_text(text, reply_markup=orders_list_keyboard(orders_for_kb, t, page, has_next, has_prev))
 
-async def admin_show_order_summary(event, state: FSMContext, order: Order, order_id: int):
+async def admin_show_order_summary(event, state: FSMContext, order: Order, order_id: int, t):
     """
     Universally sends the administrator a detailed order description,
     including all items, total cost, and customer data.
@@ -40,14 +40,31 @@ async def admin_show_order_summary(event, state: FSMContext, order: Order, order
 	"""
     await order.fetch_related('user')
     order_items = await get_order_items(order)
-    order_info = f"ФИО клиента: {order.name}\nНомер телефона: {order.phone}\nДата: {order.created_at.strftime('%d.%m.%Y %H:%M')}\nСостав:\n\n"
+    order_info = (
+            t("order.info.customer").format(name=order.name)
+            + t("order.info.phone").format(phone=order.phone)
+            + t("order.info.date").format(date=order.created_at.strftime("%d.%m.%Y %H:%M"))
+            + t("order.info.items_header")
+    )
+
     for item in order_items:
         price = item.price_at_order * item.quantity
-        order_info += f'— <i>{item.product.name}</i> × {item.quantity} = {format_price(price)} ₽\n'
-    order_info += f'\nСтоимость: {format_price(order.total_price)} ₽\nСпособ оплаты: {order.payment_method}\nДоставка: {order.delivery_method}\nАдрес доставки: {order.address}\nКомментарий: {order.comment}'
-    text = f'📝 <b>Детали заказа #{order_id}</b>\n\n{order_info}'
+        order_info += t("order.info.item_line").format(
+            product=item.product.name,
+            qty=item.quantity,
+            price=format_price(price)
+        )
+
+    order_info += (
+            t("order.info.total").format(total=format_price(order.total_price))
+            + t("order.info.payment").format(method=order.payment_method)
+            + t("order.info.delivery").format(method=order.delivery_method)
+            + t("order.info.address").format(address=order.address)
+            + t("order.info.comment").format(comment=order.comment or "-")
+    )
+    text = t('order_utils.misc.b-detali-zakaza-b').format(order_id=order_id, order_info=order_info)
     if hasattr(event, 'message'):
-        await event.message.edit_text(text=text, reply_markup=change_order_status())
+        await event.message.edit_text(text=text, reply_markup=change_order_status(t))
     else:
-        msg = await event.answer(text=text, reply_markup=change_order_status())
+        msg = await event.answer(text=text, reply_markup=change_order_status(t))
         await state.update_data(main_message_id=msg.message_id)

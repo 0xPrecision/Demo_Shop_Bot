@@ -12,7 +12,7 @@ def show_categories_keyboard(categories: list[str], t, **_) -> InlineKeyboardMar
     keyboard.append([InlineKeyboardButton(text=t('order_keyboards.buttons.v-glavnoe-menyu'), callback_data='menu_main')])
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
-def show_product_info_kb(product_id: int, t, source: str, category_name: str=None, page: int=None, **_) -> InlineKeyboardMarkup:
+def show_product_info_kb(product_id: int, source: str, t, category_name: str=None, page: int=None, **_) -> InlineKeyboardMarkup:
     """
     Builds an inline keyboard for product details.
     
@@ -30,7 +30,7 @@ def show_product_info_kb(product_id: int, t, source: str, category_name: str=Non
         kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=t('user_catalog_keyboards.buttons.ubrat-iz-korziny'), callback_data=f'removefromcart_{product_id}')], [InlineKeyboardButton(text=t('catalog_keyboards.buttons.nazad'), callback_data=back_callback)]])
     return kb
 
-def products_keyboard(products: list[dict], t, category: str, page: int, total_pages: int, **_) -> InlineKeyboardMarkup:
+def products_keyboard(products: list[dict], category: str, page: int, total_pages: int, t, **_) -> InlineKeyboardMarkup:
     """
     Creates an inline keyboard for displaying products with pagination.
     
@@ -40,16 +40,34 @@ def products_keyboard(products: list[dict], t, category: str, page: int, total_p
     :param total_pages: Total number of pages.
     :return: InlineKeyboardMarkup with products and navigation.
 	"""
+    page_label = t("user_catalog.page_label").format(page=page + 1, total_pages=total_pages)
+
     nav_row = []
     if page > 0:
-        nav_row.append(InlineKeyboardButton(text='⬅️', callback_data=f'category_{category}_{page - 1}'))
-        nav_row.append(InlineKeyboardButton(text=f'Страница {page + 1}/{total_pages}', callback_data='noop'))
+        nav_row.append(InlineKeyboardButton(text="⬅️", callback_data=f"category_{category}_{page - 1}"))
+
+        nav_row.append(InlineKeyboardButton(text=page_label, callback_data="noop"))
+
     if page < total_pages - 1:
-        nav_row.append(InlineKeyboardButton(text='➡️', callback_data=f'category_{category}_{page + 1}'))
-    keyboard = [[InlineKeyboardButton(text=f'{format_product_name(product.name, 35)} — {format_price(product.price)} ₽', callback_data=f'product_{product.id}_catalog_{category}_{page}'), InlineKeyboardButton(text=t('user_catalog_keyboards.buttons.v-korzinu'), callback_data=f'addtocart_{product.id}')] for product in products]
-    keyboard.append([InlineKeyboardButton(text=t('catalog_keyboards.buttons.nazad'), callback_data='menu_catalog')])
-    keyboard.append([InlineKeyboardButton(text=t('user_catalog_keyboards.buttons.korzina'), callback_data='menu_cart')])
-    keyboard.append([InlineKeyboardButton(text=t('order_keyboards.buttons.v-glavnoe-menyu'), callback_data='menu_main')])
-    if nav_row:
-        keyboard.append(nav_row)
-    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+        nav_row.append(InlineKeyboardButton(text="➡️", callback_data=f"category_{category}_{page + 1}"))
+
+    rows = [
+        [
+            InlineKeyboardButton(
+                text=f"{format_product_name(product.name, 35)} — {format_price(product.price)} ₽",
+                callback_data=f"product_{product.id}_catalog_{category}_{page}",
+            ),
+            InlineKeyboardButton(
+                text=t("user_catalog_keyboards.buttons.v-korzinu"),
+                callback_data=f"addtocart_{product.id}",
+            ),
+        ]
+        for product in products
+    ]
+
+    rows.append([InlineKeyboardButton(text=t("catalog_keyboards.buttons.nazad"), callback_data="menu_catalog")])
+    rows.append([InlineKeyboardButton(text=t("user_catalog_keyboards.buttons.korzina"), callback_data="menu_cart")])
+    rows.append([InlineKeyboardButton(text=t("order_keyboards.buttons.v-glavnoe-menyu"), callback_data="menu_main")])
+    rows.append(nav_row)
+
+    return InlineKeyboardMarkup(inline_keyboard=rows)

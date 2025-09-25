@@ -7,7 +7,7 @@ from bot.utils.common_utils import delete_request_and_user_message
 from bot.utils.user_utils.validators import validate_name, format_name, validate_phone, validate_address
 from database.crud import get_or_create_user_profile
 
-async def show_profile_summary(message: Message, state: FSMContext, user_id: int) -> None:
+async def show_profile_summary(message: Message, state: FSMContext, user_id: int, t) -> None:
     """
     Displays the user's profile with a short summary and confirmation/edit keyboard.
     
@@ -22,61 +22,50 @@ async def show_profile_summary(message: Message, state: FSMContext, user_id: int
     await delete_request_and_user_message(message, state)
     user_profile = await get_or_create_user_profile(user_id)
     data = await state.get_data()
-    name = data.get("name") or user_profile.full_name or "-"
-    phone = data.get("phone") or user_profile.phone or "-"
-    address = data.get("address") or user_profile.address or "-"
-
-    sep = "-" * 24
-    text = (f"👤 <b>Ваш профиль</b>\n"
-            f"{sep}\n\n"
-            f"<b>ФИО:</b> {name}\n"
-            f"<b>Телефон:</b> {phone}\n"
-            f"<b>Адрес:</b> {address}\n\n"
-            f"{sep}\n"
-            f"❓ <i>Данные корректны?</i>")
-
-    await message.answer(text, reply_markup=profile_confirm_or_edit_keyboard())
+    name = data.get('name') or user_profile.full_name or '-'
+    phone = data.get('phone') or user_profile.phone or '-'
+    address = data.get('address') or user_profile.address or '-'
+    sep = '-' * 24
+    text = t('user_profile_utils.misc.b-vash-profil-b-b-fio-b').format(name=name, phone=phone, address=address)
+    await message.answer(text, reply_markup=profile_confirm_or_edit_keyboard(t))
     await state.set_state(ProfileStates.confirm)
 
-
-async def editing_name(message: Message, state: FSMContext):
+async def editing_name(message: Message, state: FSMContext, t):
     """
-    Обработка ввода нового ФИО в режиме редактирования.
-    Проверяет валидность, обновляет профиль, показывает summary.
+    Handles entering a new full name in edit mode.
+    Validates input, updates the profile, and shows a summary.
 	"""
     user_id = message.from_user.id
     name = message.text
     if not validate_name(name):
-        await validation_process_name(message, state)
+        await validation_process_name(message, state, t)
         return
     name = format_name(name)
     await state.update_data(name=name)
-    await show_profile_summary(message, state, user_id)
+    await show_profile_summary(message, state, user_id, t)
 
-
-async def editing_phone(message: Message, state: FSMContext):
+async def editing_phone(message: Message, state: FSMContext, t):
     """
-    Обработка ввода нового телефона в режиме редактирования.
-    Проверяет валидность, обновляет профиль, показывает summary.
+    Handles entering a new phone number in edit mode.
+    Validates input, updates the profile, and shows a summary.
 	"""
     user_id = message.from_user.id
     phone = message.text
     if not validate_phone(phone):
-        await validation_process_phone(message, state)
+        await validation_process_phone(message, state, t)
         return
     await state.update_data(phone=phone)
-    await show_profile_summary(message, state, user_id)
+    await show_profile_summary(message, state, user_id, t)
 
-
-async def editing_address(message: Message, state: FSMContext):
+async def editing_address(message: Message, state: FSMContext, t):
     """
-    Обработка ввода нового адреса в режиме редактирования.
-    Проверяет валидность, обновляет профиль, показывает summary.
+    Handles entering a new address in edit mode.
+    Validates input, updates the profile, and shows a summary.
 	"""
     user_id = message.from_user.id
     address = message.text
     if not validate_address(address):
-        await validation_process_address(message, state)
+        await validation_process_address(message, state, t)
         return
     await state.update_data(address=address)
-    await show_profile_summary(message, state, user_id)
+    await show_profile_summary(message, state, user_id, t)

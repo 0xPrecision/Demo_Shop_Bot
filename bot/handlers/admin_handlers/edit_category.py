@@ -17,7 +17,7 @@ async def choose_category_to_edit(callback: CallbackQuery, t, **_):
     Selects an option for the category.
 	"""
     category_id = int(callback.data.split(':', 1)[1])
-    await callback.message.edit_text(t('admin_catalog.messages.vyberete-dejstvie'), reply_markup=edit_or_deletion_category(category_id))
+    await callback.message.edit_text(t('admin_catalog.messages.vyberete-dejstvie'), reply_markup=edit_or_deletion_category(category_id, t))
 
 @router.callback_query(F.data.startswith('admin_rename_category_select:'))
 @admin_only
@@ -43,16 +43,16 @@ async def rename_category_process(message: Message, t, state: FSMContext, **_):
     data = await state.get_data()
     cat_id = data.get('rename_category_id')
     if not new_name:
-        msg = await message.answer(t('edit_category.messages.nazvanie-ne-mozhet-byt'), reply_markup=back_menu())
+        msg = await message.answer(t('edit_category.messages.nazvanie-ne-mozhet-byt'), reply_markup=back_menu(t))
         await state.update_data(main_message_id=msg.message_id)
         return
     exists = await Category.filter(name=new_name).exists()
     if exists:
-        msg = await message.answer(t('edit_category.messages.kategoriya-s-takim-imenem'), reply_markup=back_menu())
+        msg = await message.answer(t('edit_category.messages.kategoriya-s-takim-imenem'), reply_markup=back_menu(t))
         await state.update_data(main_message_id=msg.message_id)
         return
     await update_category(cat_id, new_name)
-    msg = await message.answer(f'Категория успешно переименована в «{new_name}» ✅', reply_markup=back_menu())
+    msg = await message.answer(f'Категория успешно переименована в «{new_name}» ✅', reply_markup=back_menu(t))
     await state.update_data(main_message_id=msg.message_id)
     await state.clear()
 
@@ -68,7 +68,7 @@ async def delete_category_confirm(callback: CallbackQuery, t, **_):
         await callback.answer(t('edit_category.messages.v-kategorii-est-tovary'), show_alert=True)
         return
     category = await Category.get(id=cat_id)
-    await callback.message.edit_text(f'Вы уверены, что хотите удалить категорию «{category.name}»?', reply_markup=confirm_deletion_category(cat_id))
+    await callback.message.edit_text(f'Вы уверены, что хотите удалить категорию «{category.name}»?', reply_markup=confirm_deletion_category(cat_id, t))
     await callback.answer()
 
 @router.callback_query(F.data.startswith('admin_delete_category_yes:'))
@@ -79,5 +79,5 @@ async def delete_category_execute(callback: CallbackQuery, t, **_):
 	"""
     cat_id = int(callback.data.split(':')[1])
     await Category.filter(id=cat_id).delete()
-    await callback.message.edit_text(t('edit_category.messages.kategoriya-udalena'), reply_markup=back_menu())
+    await callback.message.edit_text(t('edit_category.messages.kategoriya-udalena'), reply_markup=back_menu(t))
     await callback.answer()

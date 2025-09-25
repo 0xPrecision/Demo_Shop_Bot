@@ -49,6 +49,6 @@ def status_keyboard(order_id: int, t, current_status: str, **_) -> InlineKeyboar
     for status_code, status_label in ORDER_STATUSES:
         if status_code == current_status:
             continue
-        buttons.append([InlineKeyboardButton(text=status_label, callback_data=f'admin_order_set_status:{order_id}:{status_code}')])
+        buttons.append([InlineKeyboardButton(text=t(status_label), callback_data=f'admin_order_set_status:{order_id}:{status_code}')])
     buttons.append([InlineKeyboardButton(text=t('catalog_keyboards.buttons.nazad'), callback_data=f'admin_order_detail:{order_id}')])
     return InlineKeyboardMarkup(inline_keyboard=buttons)

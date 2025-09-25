@@ -45,14 +45,14 @@ async def search_order_query(message: Message, t, state: FSMContext, **_):
             user_ids = [u.id for u in users]
             orders = await Order.filter(user_id__in=user_ids).all()
     if not orders:
-        await message.answer(t('search_order.messages.nichego-ne-najdeno'), reply_markup=back_menu())
+        await message.answer(t('search_order.messages.nichego-ne-najdeno'), reply_markup=back_menu(t))
         await state.clear()
         return
     if len(orders) == 1:
         order = orders[0]
-        await admin_show_order_summary(message, state, order, order_id=order.id)
+        await admin_show_order_summary(message, state, order, order.id, t)
         await state.clear()
     else:
-        msg = await message.answer(f'Найдено заказов: {len(orders)}\nВыберите для просмотра:', reply_markup=show_orders_for_search(orders))
+        msg = await message.answer(t("search_order.naydeno-zakazov").format(orders=len(orders)), reply_markup=show_orders_for_search(orders))
         await state.update_data(main_message_id=msg.message_id)
         await state.clear()

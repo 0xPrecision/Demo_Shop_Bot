@@ -6,10 +6,10 @@ router = Router()
 
 @router.callback_query(F.data == 'admin_help')
 @admin_only
-async def admin_help(callback: CallbackQuery):
+async def admin_help(callback: CallbackQuery, t):
     """
     Sends help about the admin panel features and quick links.
 	"""
     text = t('admin_help.misc.b-admin-panel-pomosch-b-b-osnovnye')
-    await callback.message.edit_text(text, reply_markup=help_keyboard())
+    await callback.message.edit_text(text, reply_markup=help_keyboard(t))
     await callback.answer()

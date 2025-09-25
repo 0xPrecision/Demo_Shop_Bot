@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bot.utils.common_utils import format_product_name
 
-def cart_keyboard(products: list[tuple], t, page: int, total_pages: int, **_) -> InlineKeyboardMarkup:
+def cart_keyboard(products: list[tuple], page: int, total_pages: int, t, **_) -> InlineKeyboardMarkup:
     """
     Creates an inline keyboard for the cart with navigation and a “Pay” button.
     :param products: List of (Cart, Product) tuples for the current page.
@@ -12,7 +12,7 @@ def cart_keyboard(products: list[tuple], t, page: int, total_pages: int, **_) ->
     nav_row = []
     if page > 0:
         nav_row.append(InlineKeyboardButton(text='⬅️', callback_data=f'cart_{page - 1}'))
-        nav_row.append(InlineKeyboardButton(text=f'Страница {page + 1}/{total_pages}', callback_data='noop'))
+        nav_row.append(InlineKeyboardButton(text=t("page_button".format(page=page, total_pages=total_pages)), callback_data='noop'))
     if page < total_pages - 1:
         nav_row.append(InlineKeyboardButton(text='➡️', callback_data=f'cart_{page + 1}'))
     if nav_row:

@@ -11,7 +11,7 @@ from bot.keyboards.user.user_common_keyboards import cart_back_menu
 from config_data.bot_instance import bot
 router = Router()
 
-async def show_cart(callback: CallbackQuery, t, state: FSMContext, **_) -> None:
+async def show_cart(callback: CallbackQuery, state: FSMContext, t, **_) -> None:
     """
     Displays the user's cart.
 	"""
@@ -19,13 +19,13 @@ async def show_cart(callback: CallbackQuery, t, state: FSMContext, **_) -> None:
     user_id = callback.from_user.id
     cart_items = await get_cart(user_id)
     if cart_items:
-        text, keyboard = await build_cart_view(cart_items, page=0)
-        await callback.bot.send_message(user_id, text, reply_markup=keyboard or main_menu())
+        text, keyboard = await build_cart_view(cart_items, t, page=0)
+        await callback.bot.send_message(user_id, text, reply_markup=keyboard or main_menu(t))
     else:
-        await bot.send_message(user_id, t('user_cart.messages.vasha-korzina-pusta'), reply_markup=cart_back_menu())
+        await bot.send_message(user_id, t('user_cart.messages.vasha-korzina-pusta'), reply_markup=cart_back_menu(t))
 
 @router.callback_query(F.data.startswith('cart_'))
-async def paginate_cart(callback: CallbackQuery) -> None:
+async def paginate_cart(callback: CallbackQuery, t) -> None:
     """
     Handles cart pagination.
     
@@ -34,9 +34,9 @@ async def paginate_cart(callback: CallbackQuery) -> None:
 	"""
     page = int(callback.data.split('_')[1]) if '_' in callback.data else 0
     cart_items = await get_cart(callback.from_user.id)
-    text, keyboard = await build_cart_view(cart_items, page)
+    text, keyboard = await build_cart_view(cart_items, t, page)
     try:
-        await callback.message.edit_text(text, reply_markup=keyboard or main_menu())
+        await callback.message.edit_text(text, reply_markup=keyboard or main_menu(t))
     except TelegramBadRequest as e:
         if 'message is not modified' in str(e):
             pass
@@ -78,7 +78,7 @@ async def remove_from_cart_handler(callback: CallbackQuery, t, **_) -> None:
     page = int(parts[2]) if len(parts) > 2 else 0
     await remove_from_cart(user_id, product_id)
     cart_items = await get_cart(user_id)
-    text, keyboard = await build_cart_view(cart_items, page)
+    text, keyboard = await build_cart_view(cart_items, t, page)
     try:
         await callback.message.edit_text(text, reply_markup=keyboard)
     except TelegramBadRequest as e:
@@ -98,4 +98,4 @@ async def clear_cart_handler(callback: CallbackQuery, t, state: FSMContext, **_)
     user_id = callback.from_user.id
     await clear_cart(user_id)
     await delete_request_and_user_message(callback.message, state)
-    await bot.send_message(user_id, t('user_cart.messages.vasha-korzina-pusta'), reply_markup=cart_back_menu())
+    await bot.send_message(user_id, t('user_cart.messages.vasha-korzina-pusta'), reply_markup=cart_back_menu(t))

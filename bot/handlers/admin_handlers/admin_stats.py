@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from aiogram.types import CallbackQuery, FSInputFile
 import csv
 import io
 from datetime import datetime, timedelta
@@ -11,7 +11,7 @@ router = Router()
 
 @router.callback_query(F.data == 'admin_stats')
 @admin_only
-async def admin_stats_menu(callback: CallbackQuery):
+async def admin_stats_menu(callback: CallbackQuery, t):
     """
     Statistics main menu: summary and quick export of orders/products.
 	"""
@@ -31,8 +31,14 @@ async def admin_stats_menu(callback: CallbackQuery):
         prod = await Product.get_or_none(id=prod_id)
         if prod:
             top_lines.append(f'{idx}) {prod.name} — {qty} шт.')
-    stats_text = f'📊 <b>Статистика за 30 дней:</b>\nВсего заказов: <b>{orders_count}</b>\nОбщая сумма: <b>{total_sum:.2f} ₽</b>\nТоп-товары:\n' + ('\n'.join(top_lines) if top_lines else '—')
-    await callback.message.edit_text(stats_text, reply_markup=stats_actions())
+    stats_text = (
+            t("stats.header")
+            + t("stats.orders_count").format(count=orders_count)
+            + t("stats.total_sum").format(total=total_sum)
+            + t("stats.top_products")
+            + ('\n'.join(top_lines) if top_lines else t("stats.no_products"))
+    )
+    await callback.message.edit_text(stats_text, reply_markup=stats_actions(t))
     await callback.answer()
 
 @router.callback_query(F.data == 'admin_export_orders_csv')
@@ -45,7 +51,7 @@ async def export_orders_csv(callback: CallbackQuery, t, **_):
     orders = await Order.filter(created_at__gte=date_from).all()
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['ID', 'Дата', 'Покупатель', t('user_checkout_keyboards.buttons.telefon'), 'Сумма', 'Статус', t('user_checkout_keyboards.buttons.sposob-oplaty'), 'Доставка', t('user_checkout_keyboards.buttons.adres'), t('user_checkout_keyboards.buttons.kommentarij')])
+    writer.writerow(['ID', 'Date', 'Customer', t('user_checkout_keyboards.buttons.telefon'), 'Total', 'Status', t('user_checkout_keyboards.buttons.sposob-oplaty'), 'Delivery', t('user_checkout_keyboards.buttons.adres'), t('user_checkout_keyboards.buttons.kommentarij')])
     for o in orders:
         await o.fetch_related('user')
         writer.writerow([o.id, o.created_at.strftime('%d.%m.%Y %H:%M'), getattr(o.user, 'full_name', '-'), getattr(o.user, 'phone', '-'), f'{o.total_price:.2f}', o.status, o.payment_method, o.delivery_method, o.address, o.comment])
@@ -54,5 +60,5 @@ async def export_orders_csv(callback: CallbackQuery, t, **_):
         tmpfile.write(output.read().encode('utf-8'))
         tmpfile_path = tmpfile.name
     file_name = f"orders_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
-    await callback.message.answer_document(FSInputFile(tmpfile_path, filename=file_name), caption='Экспорт заказов за 30 дней (CSV)')
+    await callback.message.answer_document(FSInputFile(tmpfile_path, filename=file_name), caption='Orders export for 30 days (CSV)')
     await callback.answer()

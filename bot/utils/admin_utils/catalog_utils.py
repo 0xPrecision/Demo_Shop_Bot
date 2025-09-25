@@ -52,7 +52,7 @@ async def filter_or_change_pr_category(event: Union[CallbackQuery, Message], sta
 	"""
     categories = await get_all_categories()
     if not categories:
-        msg_text = 'Категории не найдены.\n\nХотите создать новую?'
+        msg_text = t("kategorii-ne-naydeny")
         kb = ask_of_create_category(t, **_)
         if isinstance(event, CallbackQuery):
             await event.message.edit_text(msg_text, reply_markup=kb)

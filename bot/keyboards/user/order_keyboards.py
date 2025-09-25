@@ -1,13 +1,9 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from typing import List, Optional
+
+from bot.utils.common_utils import get_order_status_label
 from database.models import Order
 
-def format_status(status: str) -> str:
-    """
-    Adds an emoji to the status.
-	"""
-    mapping = {'В работе': '🟡 В работе', 'Готово': '🟢 Завершён', 'Отменён': '🔴 Отменён'}
-    return mapping.get(status, status)
 
 def show_orders_keyboard(orders: List[Order], t, **_) -> InlineKeyboardMarkup:
     """
@@ -19,19 +15,30 @@ def show_orders_keyboard(orders: List[Order], t, **_) -> InlineKeyboardMarkup:
     :param orders: List of the user's Order objects.
     :return: InlineKeyboardMarkup — inline keyboard.
 	"""
-    keyboard = [[InlineKeyboardButton(text=f'📝 Заказ #{order.id} — {format_status(order.status)}', callback_data=f'order_details_{order.id}')] for order in orders]
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                text=t("orders.list.item").format(
+                    order_id=order.id,
+                    status=get_order_status_label(order.status, t)  # тут возвращается локализованный текст со смайликом
+                ),
+                callback_data=f"order_details_{order.id}"
+            )
+        ]
+        for order in orders
+    ]
     keyboard.append([InlineKeyboardButton(text=t('catalog_keyboards.buttons.nazad'), callback_data='my_orders')])
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
-def order_details_keyboard(order_id: Optional[int], t=None, **_) -> InlineKeyboardMarkup:
+def order_details_keyboard(t, order_id: Optional[int] = None, **_) -> InlineKeyboardMarkup:
     """
-    Создаёт клавиатуру для подробного просмотра заказа.
-    
-    Кнопки: возврат к списку заказов и переход в главное меню.
-    
-    :param order_id: идентификатор заказа (не используется, но можно для расширения).
-    :return: InlineKeyboardMarkup — инлайн-клавиатура.
-	"""
+    Creates a keyboard for detailed order view.
+
+    Buttons: return to the list of orders and go to the main menu.
+
+    :param order_id: order identifier (not used, but can be kept for extension).
+    :return: InlineKeyboardMarkup — inline keyboard.
+    """
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=t('order_keyboards.buttons.k-spisku-zakazov'), callback_data='menu_orders')], [InlineKeyboardButton(text=t('order_keyboards.buttons.v-glavnoe-menyu'), callback_data='menu_main')]])
 
 def order_confirm_keyboard(t, **_):
