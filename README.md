@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13+-blue.svg) ![License](https://img.shields.io/badge/License-MIT-green.svg) ![Status](https://img.shields.io/badge/Status-Active-success.svg)
 
-###
+
 ### A professional Telegram bot template for e-commerce.
 #### Launch a fully functional online shop in just a few hours — fully modular, scalable, and ready for integration with payments, CRM, and subscriptions.
 
@@ -30,9 +30,9 @@
 
 ## Project Description
 
-##### **Demo Shop Bot** — is a professional online store template based on a Telegram bot, designed for small businesses.  
+##### **Demo Shop Bot** is a professional online store template based on a Telegram bot, designed for small businesses.  
 Built with Python using aiogram 3+, FSM, and SQLite (Tortoise ORM).  
-It allows you to launch a fully functional e-commerce project in just a few hours, easily adapts to any client needs, and scales up to a CRM system or online acquiring.  
+It allows you to launch a fully functional e-commerce project in just a few hours, easily adapts to any client's needs, and scales up to a CRM system or online acquiring.  
 Ready for integration with payment services and further feature development.
 
 ---
@@ -68,7 +68,7 @@ Demo_Shop_Bot/
 ├── bot/
 │   ├── handlers/
 │   │    ├── admin_handlers/
-│   │    │     ├── init.py
+│   │    │     ├── __init__.py
 │   │    │     ├── add_category.py
 │   │    │     ├── add_product.py
 │   │    │     ├── admin_access.py
@@ -83,7 +83,7 @@ Demo_Shop_Bot/
 │   │    │     ├── search_order.py
 │   │    │     └── search_product.py
 │   │    ├── user_handlers/
-│   │    │     ├── init.py
+│   │    │     ├── __init__.py
 │   │    │     ├── user_cart.py
 │   │    │     ├── user_catalog.py
 │   │    │     ├── user_checkout.py
@@ -92,17 +92,17 @@ Demo_Shop_Bot/
 │   │    │     ├── user_menu.py
 │   │    │     ├── user_orders.py
 │   │    │     └── user_profile.py
-│   │    └── init.py
+│   │    └── __init__.py
 │   ├── keyboards/
 │   │    ├── admin/
-│   │    │     ├── init.py
+│   │    │     ├── __init__.py
 │   │    │     ├── admin_menu.py
 │   │    │     ├── catalog_keyboards.py
 │   │    │     ├── help_keyboard.py
 │   │    │     ├── order_keyboards.py
 │   │    │     └── stats_kb.py
 │   │    └── user/
-│   │          ├── init.py
+│   │          ├── __init__.py
 │   │          ├── order_keyboards.py
 │   │          ├── user_cart_keyboards.py
 │   │          ├── user_catalog_keyboards.py
@@ -112,21 +112,21 @@ Demo_Shop_Bot/
 │   │          └── user_profile_keyboards.py
 │   ├── states/
 │   │    ├── admin_states/
-│   │    │     ├── init.py
+│   │    │     ├── __init__.py
 │   │    │     ├── category_states.py
 │   │    │     ├── order_states.py
 │   │    │     └── product_states.py
 │   │    └── user_states/
-│   │          ├── init.py
+│   │          ├── __init__.py
 │   │          ├── order_states.py
 │   │          └── profile_states.py
 │   └── utils/
 │        ├── admin_utils/
-│        │     ├── init.py
+│        │     ├── __init__.py
 │        │     ├── catalog_utils.py
 │        │     └── order_utils.py
 │        ├── user_utils/
-│        │     ├── init.py
+│        │     ├── __init__.py
 │        │     ├── universal_handlers.py
 │        │     ├── user_cart_utils.py
 │        │     ├── user_checkout_utils.py
@@ -137,28 +137,28 @@ Demo_Shop_Bot/
 │        ├── common_utils.py
 │        └── constants.py
 ├── config_data/
-│   ├── init.py
+│   ├── __init__.py
 │   ├── bot_instance.py
 │   └── env.py
 ├── database/
-│   ├── init.py
+│   ├── __init__.py
 │   ├── crud.py
-│   ├── init_db.py
+│   ├── __init___db.py
 │   └── models.py
 ├── services/
 │   ├── i18n/
-│   │    ├── init.py
+│   │    ├── __init__.py
 │   │    ├── middleware.py
 │   │    └── translations.py
 │   ├── locales/
 │   │    ├── en
-│   │    │   ├── init.py
+│   │    │   ├── __init__.py
 │   │    │   └── en.json
 │   │    ├── ru
-│   │    │   ├── init.py
+│   │    │   ├── __init__.py
 │   │    │   └── ru.json
-│   │    └── init.py
-│   ├── init.py
+│   │    └── __init__.py
+│   ├── __init__.py
 │   └── locale_repo.py
 ├── .env
 ├── .gitignore
@@ -178,7 +178,7 @@ Demo_Shop_Bot/
 - Catalog with categories, product pagination and filtering  
 - Cart: add, remove, clear, and view items in one place  
 - Automatic user profile creation after the first purchase  
-- Autofill of contact details from profile when placing an order  
+- Autofill contact details from profile when placing an order  
 - Order placement with validation and FSM (step-by-step scenarios, all temporary states stored in Redis)  
 - CRUD user profile with edit mode  
 - Navigation and return to menu/catalog from any step  
