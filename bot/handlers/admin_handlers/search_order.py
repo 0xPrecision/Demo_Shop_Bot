@@ -12,18 +12,18 @@ router = Router()
 
 @router.callback_query(F.data == 'admin_search_order')
 @admin_only
-async def start_search_order(callback: CallbackQuery, t, state: FSMContext, **_):
+async def start_search_order(callback: CallbackQuery, state: FSMContext, t, **_):
     """
     Starts the FSM for order search.
 	"""
-    msg = await callback.message.edit_text(t('search_order.messages.vvedite-id-zakaza'))
+    msg = await callback.message.edit_text(t('search_order.messages.vvedite-id-zakaza'), reply_markup=back_menu(t))
     await state.update_data(main_message_id=msg.message_id)
     await state.set_state(OrderSearchStates.waiting_query)
     await callback.answer()
 
 @router.message(OrderSearchStates.waiting_query)
 @admin_only
-async def search_order_query(message: Message, t, state: FSMContext, **_):
+async def search_order_query(message: Message, state: FSMContext, t, **_):
     """
     Searches for an order by ID, name, or phone number.
 	"""
@@ -45,7 +45,7 @@ async def search_order_query(message: Message, t, state: FSMContext, **_):
             user_ids = [u.id for u in users]
             orders = await Order.filter(user_id__in=user_ids).all()
     if not orders:
-        await message.answer(t('search_order.messages.nichego-ne-najdeno'), reply_markup=back_menu(t))
+        await message.answer(t('search_product.messages.nichego-ne-najdeno-poprobujte"'), reply_markup=back_menu(t))
         await state.clear()
         return
     if len(orders) == 1:
@@ -53,6 +53,6 @@ async def search_order_query(message: Message, t, state: FSMContext, **_):
         await admin_show_order_summary(message, state, order, order.id, t)
         await state.clear()
     else:
-        msg = await message.answer(t("search_order.naydeno-zakazov").format(orders=len(orders)), reply_markup=show_orders_for_search(orders))
+        msg = await message.answer(t("search_order.naydeno-zakazov").format(orders=len(orders)), reply_markup=show_orders_for_search(orders, t))
         await state.update_data(main_message_id=msg.message_id)
         await state.clear()

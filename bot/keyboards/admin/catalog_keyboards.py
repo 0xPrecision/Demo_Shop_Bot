@@ -44,7 +44,7 @@ def show_products_for_search(products, t) -> InlineKeyboardMarkup:
     keyboard = [
         [
             InlineKeyboardButton(
-                text=f"#_id {p.id} | {p.name} | {format_price(p.price)} ₽ | {p.status_label(t)}",
+                text=f"#_id {p.id} | {p.name} | {format_price(p.price)} {t("currency")} | {p.status_label(t)}",
                 callback_data=f"admin_product_detail:{p.id}"
             )
         ]
@@ -110,7 +110,7 @@ def show_products_or_edit_category(cat_id, t, **_) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=t('catalog_keyboards.buttons.redaktirovat-kategoriyu'), callback_data=f'admin_edit_category:{cat_id}')], [InlineKeyboardButton(text=t('catalog_keyboards.buttons.prosmotret-tovary'), callback_data=f'admin_category_filter:{cat_id}')], [InlineKeyboardButton(text=t('catalog_keyboards.buttons.nazad'), callback_data=f'admin_categories')]])
 
 def edit_or_deletion_category(cat_id, t, **_) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=t('catalog_keyboards.buttons.pereimenovat'), callback_data=f'admin_rename_category_select:{cat_id}')], [InlineKeyboardButton(text=t('catalog_keyboards.buttons.udalit.2'), callback_data=f'admin_delete_category_select:{cat_id}')], [InlineKeyboardButton(text=t('catalog_keyboards.buttons.nazad'), callback_data=f'admin_select_category:{cat_id}')]])
+    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=t('catalog_keyboards.buttons.pereimenovat'), callback_data=f'admin_rename_category_select:{cat_id}')], [InlineKeyboardButton(text=t('catalog_keyboards.buttons.udalit'), callback_data=f'admin_delete_category_select:{cat_id}')], [InlineKeyboardButton(text=t('catalog_keyboards.buttons.nazad'), callback_data=f'admin_select_category:{cat_id}')]])
 
 def admin_categories_keyboard(categories: List['Category'], t, **_) -> InlineKeyboardMarkup:
     """Клавиатура для отображения категорий"""

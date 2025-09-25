@@ -92,7 +92,7 @@ async def notify_admin_about_new_order(bot: Bot, order, t):
     """
     Sends an admin notification about a new order.
 	"""
-    text = t('user_checkout_utils.misc.soobschenie-dlya-administratora').format(id=order.id, full_name=order.name, phone=order.phone, total=format_price(order.total_price), currency="₽", status=order.status)
+    text = t('user_checkout_utils.misc.soobschenie-dlya-administratora').format(id=order.id, full_name=order.name, phone=order.phone, total=format_price(order.total_price), currency=t("currency"), order_status=order.status)
     for admin_id in ADMIN_IDS:
         try:
             await bot.send_message(chat_id=int(admin_id), text=text)

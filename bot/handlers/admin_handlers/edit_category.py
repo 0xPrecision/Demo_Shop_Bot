@@ -52,7 +52,7 @@ async def rename_category_process(message: Message, t, state: FSMContext, **_):
         await state.update_data(main_message_id=msg.message_id)
         return
     await update_category(cat_id, new_name)
-    msg = await message.answer(f'Категория успешно переименована в «{new_name}» ✅', reply_markup=back_menu(t))
+    msg = await message.answer(t("edit_category.rename-category").format(new_name=new_name), reply_markup=back_menu(t))
     await state.update_data(main_message_id=msg.message_id)
     await state.clear()
 
@@ -68,7 +68,7 @@ async def delete_category_confirm(callback: CallbackQuery, t, **_):
         await callback.answer(t('edit_category.messages.v-kategorii-est-tovary'), show_alert=True)
         return
     category = await Category.get(id=cat_id)
-    await callback.message.edit_text(f'Вы уверены, что хотите удалить категорию «{category.name}»?', reply_markup=confirm_deletion_category(cat_id, t))
+    await callback.message.edit_text(t("edit_category.you-wanna-delete").format(category_name=category.name), reply_markup=confirm_deletion_category(cat_id, t))
     await callback.answer()
 
 @router.callback_query(F.data.startswith('admin_delete_category_yes:'))

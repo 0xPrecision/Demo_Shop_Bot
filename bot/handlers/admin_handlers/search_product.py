@@ -49,7 +49,7 @@ async def search_product_query(message: Message, t, state: FSMContext, **_):
                                                                                pr_category=category,
                                                                                description=pr_descr,
                                                                                price=pr_price,
-                                                                               currency="₽",
+                                                                               currency=t("currency"),
                                                                                stock=stock)
         if product.photo:
             await message.bot.send_photo(chat_id=message.chat.id, photo=product.photo, caption=text, reply_markup=await product_admin_keyboard(product.id, t))

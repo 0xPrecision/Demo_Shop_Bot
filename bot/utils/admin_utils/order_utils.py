@@ -5,12 +5,11 @@ from bot.utils.common_utils import format_price
 from database.crud import get_orders_page, get_order_items
 from database.models import Order
 
-def get_order_short_info(order) -> str:
+def get_order_short_info(order, t) -> str:
     """
     Generates a short order description for displaying in an inline keyboard.
 	"""
-    date = order.created_at.strftime('%d.%m %H:%M')
-    return f'{date} | {order.status} | {format_price(order.total_price)} ₽'
+    return f'{order.status}'
 
 async def show_orders(callback: CallbackQuery, t, page: int, text: str, **_):
     """
@@ -22,7 +21,7 @@ async def show_orders(callback: CallbackQuery, t, page: int, text: str, **_):
     :return: None.
 	"""
     orders, has_next, has_prev = await get_orders_page(page)
-    orders_for_kb = [(order.id, get_order_short_info(order)) for order in orders]
+    orders_for_kb = [(order.id, get_order_short_info(order, t)) for order in orders]
     if not orders:
         await callback.answer(t('order_utils.messages.zakazov-poka-net'), show_alert=True)
         return
@@ -43,7 +42,7 @@ async def admin_show_order_summary(event, state: FSMContext, order: Order, order
     order_info = (
             t("order.info.customer").format(name=order.name)
             + t("order.info.phone").format(phone=order.phone)
-            + t("order.info.date").format(date=order.created_at.strftime("%d.%m.%Y %H:%M"))
+            + t("order.info.date").format(date=order.created_at.strftime(t("date_format")))
             + t("order.info.items_header")
     )
 
@@ -52,11 +51,12 @@ async def admin_show_order_summary(event, state: FSMContext, order: Order, order
         order_info += t("order.info.item_line").format(
             product=item.product.name,
             qty=item.quantity,
-            price=format_price(price)
+            price=format_price(price),
+            currency=t("currency")
         )
 
     order_info += (
-            t("order.info.total").format(total=format_price(order.total_price))
+            t("order.info.total").format(total=format_price(order.total_price), currency=t("currency"))
             + t("order.info.payment").format(method=order.payment_method)
             + t("order.info.delivery").format(method=order.delivery_method)
             + t("order.info.address").format(address=order.address)

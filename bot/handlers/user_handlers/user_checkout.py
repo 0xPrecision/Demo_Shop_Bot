@@ -32,7 +32,7 @@ async def place_an_order_handler(callback: CallbackQuery, t, state: FSMContext, 
     user_profile = await get_or_create_user_profile(user_id)
     cart_items = await get_cart(user_id)
     if not cart_items:
-        await callback.message.answer(t('user_checkout.messages.vasha-korzina-pusta'), reply_markup=cart_back_menu(t))
+        await callback.message.answer(t('user_cart.messages.vasha-korzina-pusta'), reply_markup=cart_back_menu(t))
         return
     await state.update_data(cart=[{'product_id': item.product_id, 'qty': item.quantity} for item in cart_items])
     fields_to_check = ['full_name', 'phone', 'address']
@@ -109,11 +109,11 @@ async def order_comment_handler(message: Message, state: FSMContext, t):
     await state.set_state(OrderStates.choosing_payment)
 
 @router.message(OrderStates.editing_comment)
-async def edit_comment_handler_order(message: Message, state: FSMContext):
+async def edit_comment_handler_order(message: Message, state: FSMContext, t):
     """
     Handler for editing the order comment.
 	"""
-    await editing_comment(message, state)
+    await editing_comment(message, state, t)
 
 @router.callback_query(OrderStates.choosing_payment)
 async def choose_payment_method(callback: CallbackQuery, t, state: FSMContext, **_):
@@ -309,9 +309,11 @@ async def order_confirm_handler(callback: CallbackQuery, t, state: FSMContext, *
     user_id = callback.from_user.id
     data = await state.get_data()
     bot = callback.bot
-    order = await create_order(user_id=user_id, name=data.get('name'), phone=data.get('phone'), payment_method=data.get('payment_method'), delivery_method=data.get('delivery_method'), address=data.get('address'), comment=data.get('comment'))
+    order = await create_order(user_id=user_id, name=data.get('name'), phone=data.get('phone'), status=t("order.status.in_progress"), payment_method=data.get('payment_method'), delivery_method=data.get('delivery_method'), address=data.get('address'), comment=data.get('comment'))
     await notify_admin_about_new_order(bot, order, t)
-    await create_user_profile(user_id=user_id, name=data.get('name'), phone=data.get('phone'), address=data.get('address'))
+    user = await get_or_create_user_profile(user_id)
+    if not user:
+        await create_user_profile(user_id=user_id, name=data.get('name'), phone=data.get('phone'), address=data.get('address'))
     if not order:
         await callback.message.answer(t('user_checkout.messages.korzina-pusta'), reply_markup=cart_back_menu(t))
         await state.clear()

@@ -242,7 +242,7 @@ async def create_order(
     user_id: int,
     name: str = "-",
     phone: str = "-",
-    status: str = "🔧 В обработке",
+    status: str = None,
     payment_method: str = "-",
     delivery_method: str = "-",
     address: str = "-",

@@ -184,6 +184,7 @@ async def add_product_category(event: Union[CallbackQuery, Message], state: FSMC
 
     text = t("add_product.dannye-tovara").format(name=name,
                                                 price=price,
+                                                currency=t("currency"),
                                                 descr=descr,
                                                 stock=stock,
                                                 category=category,

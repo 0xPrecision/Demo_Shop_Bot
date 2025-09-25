@@ -74,7 +74,7 @@ async def admin_product_detail(callback: CallbackQuery, t, state: FSMContext, **
                                                                            pr_category=category,
                                                                            description=pr_descr,
                                                                            price=pr_price,
-                                                                           currency="₽",
+                                                                           currency=t("currency"),
                                                                            stock=stock)
     if product.photo:
         msg = await callback.message.answer_photo(photo=product.photo, caption=text, reply_markup=await product_admin_keyboard(product_id, t))

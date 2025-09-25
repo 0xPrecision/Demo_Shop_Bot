@@ -36,11 +36,7 @@ async def show_products_in_category(callback: CallbackQuery, t, state: FSMContex
         await callback.answer()
         return
     page_products, total_pages, current_page = paginate(category_products, page, PAGE_SIZE)
-    text = (
-            t("category.header").format(category_name=category_name)
-            + t("category.separator")
-            + t("category.hint")
-    )
+    text = (t("category.header").format(category_name=category_name))
     markup = products_keyboard(page_products, category_name, current_page, total_pages, t)
     msg = await callback.message.answer(text, reply_markup=markup)
     await state.update_data(main_message_id=msg.message_id)
@@ -73,7 +69,7 @@ async def show_product_info(callback: CallbackQuery, t, **_):
         .format(
             name=product.name,
             price=format_price(product.price),
-            currency="₽",
+            currency=t("currency"),
             description=product.description or t("product.card.no_description")
         )
     )

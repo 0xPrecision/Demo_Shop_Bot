@@ -1,6 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from typing import List, Tuple
 from bot.constants import ORDER_STATUSES
+from bot.utils.common_utils import format_price
+
 
 def orders_list_keyboard(orders: List[Tuple[int, str]], t, page: int=1, has_next: bool=False, has_prev: bool=False, **_) -> InlineKeyboardMarkup:
     """
@@ -23,20 +25,20 @@ def orders_list_keyboard(orders: List[Tuple[int, str]], t, page: int=1, has_next
     buttons.append([InlineKeyboardButton(text=t('help_keyboard.buttons.glavnoe-menyu'), callback_data='/start_admin')])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
-def show_orders_for_search(orders) -> InlineKeyboardMarkup:
+def show_orders_for_search(orders, t) -> InlineKeyboardMarkup:
     """
     Creates an inline keyboard for searching and selecting an order from the list.
     
     :param orders: list of orders (Order), each must have attributes id, user.full_name, total_price.
     :return: InlineKeyboardMarkup — keyboard for displaying found orders.
 	"""
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=f'id#{o.id} | {o.user.full_name} | {o.total_price}₽', callback_data=f'admin_order_detail:{o.id}')] for o in orders])
+    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=f'id_#{o.id} | {o.name} | {format_price(o.total_price)} {t("currency")}', callback_data=f'admin_order_detail:{o.id}')] for o in orders])
 
 def change_order_status(t, **_):
     """
     Keyboard for changing order status and contacting the customer.
 	"""
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=t('order_keyboards.buttons.smenit-status'), callback_data='change_status')], [InlineKeyboardButton(text=t('help_keyboard.buttons.glavnoe-menyu'), callback_data='/start_admin')]])
+    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=t('order_keyboards.buttons.smenit-status'), callback_data='change_status')], [InlineKeyboardButton(text=t('help_keyboard.buttons.zakazy'), callback_data='admin_orders')]])
 
 def status_keyboard(order_id: int, t, current_status: str, **_) -> InlineKeyboardMarkup:
     """

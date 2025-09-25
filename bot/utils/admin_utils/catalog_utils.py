@@ -7,14 +7,14 @@ from bot.utils.common_utils import format_price, delete_request_and_user_message
 from database.crud import get_all_categories
 from database.models import Product
 
-def get_product_short_info(product) -> str:
+def get_product_short_info(product, t) -> str:
     """
     Generates a short string with the main product info for an inline keyboard.
     
     :param product: Product object.
-    :return: String like "Name | Price ₽".
+    :return: String like "Name | Price".
 	"""
-    return f'{product.name} | {format_price(product.price)} ₽'
+    return f'{product.name} | {format_price(product.price)} {t("currency")}'
 
 async def get_products_info(callback: CallbackQuery, t, page: int, text: str, func: Awaitable[Tuple[List['Product'], bool, bool]], state: FSMContext, **_) -> None:
     """
@@ -29,7 +29,7 @@ async def get_products_info(callback: CallbackQuery, t, page: int, text: str, fu
 	"""
     await delete_request_and_user_message(callback.message, state)
     products, has_next, has_prev = await func
-    products_for_kb = [(product.id, get_product_short_info(product)) for product in products]
+    products_for_kb = [(product.id, get_product_short_info(product, t)) for product in products]
     if not products:
         msg = await callback.message.answer(t('catalog_utils.messages.tovarov-poka-net-hotite'), reply_markup=ask_of_create_product(t))
         await state.update_data(main_message_id=msg.message_id)

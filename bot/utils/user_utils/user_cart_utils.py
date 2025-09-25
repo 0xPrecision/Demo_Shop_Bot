@@ -39,9 +39,10 @@ async def build_cart_view(cart_items: List[Cart], t, page: int=0, **_) -> Tuple[
                 name=product.name,
                 qty=item.quantity,
                 unit_price=format_price(product.price),
-                total=format_price(product_price)
+                total=format_price(product_price),
+                currency=t("currency")
             )
-        text += t("cart.total").format(total=format_price(total))
+        text += t("cart.total").format(total=format_price(total), currency=t("currency"))
         page_products, total_pages, _ = paginate(cart_pairs, page, PAGE_SIZE)
         keyboard = cart_keyboard(page_products, page, total_pages, t)
         return text, keyboard

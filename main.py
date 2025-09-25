@@ -30,7 +30,7 @@ async def main():
     dp.update.middleware.register(LocaleMiddleware(translator, locale_repo))
     dp.include_router(admin_router)
     dp.include_router(user_router)
-    print('Бот запущен!')
+    print('Bot is active!')
     try:
         await dp.start_polling(bot)
     finally:

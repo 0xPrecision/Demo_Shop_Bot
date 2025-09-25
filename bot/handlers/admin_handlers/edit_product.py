@@ -183,7 +183,7 @@ async def show_edit_product_summary(message_or_callback, product, state, t, edit
                                                                            pr_category=data['category'],
                                                                            description=data['description'] or '—',
                                                                            price=format_price(data['price']),
-                                                                           currency="₽",
+                                                                           currency=t("currency"),
                                                                            stock=data['stock'])
     if data.get('photo'):
         try:

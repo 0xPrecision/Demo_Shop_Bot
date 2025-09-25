@@ -34,7 +34,7 @@ async def admin_stats_menu(callback: CallbackQuery, t):
     stats_text = (
             t("stats.header")
             + t("stats.orders_count").format(count=orders_count)
-            + t("stats.total_sum").format(total=total_sum)
+            + t("stats.total_sum").format(total=total_sum, currency=t("currency"))
             + t("stats.top_products")
             + ('\n'.join(top_lines) if top_lines else t("stats.no_products"))
     )
@@ -54,11 +54,11 @@ async def export_orders_csv(callback: CallbackQuery, t, **_):
     writer.writerow(['ID', 'Date', 'Customer', t('user_checkout_keyboards.buttons.telefon'), 'Total', 'Status', t('user_checkout_keyboards.buttons.sposob-oplaty'), 'Delivery', t('user_checkout_keyboards.buttons.adres'), t('user_checkout_keyboards.buttons.kommentarij')])
     for o in orders:
         await o.fetch_related('user')
-        writer.writerow([o.id, o.created_at.strftime('%d.%m.%Y %H:%M'), getattr(o.user, 'full_name', '-'), getattr(o.user, 'phone', '-'), f'{o.total_price:.2f}', o.status, o.payment_method, o.delivery_method, o.address, o.comment])
+        writer.writerow([o.id, o.created_at.strftime(t("date_format")), getattr(o.user, 'full_name', '-'), getattr(o.user, 'phone', '-'), f'{o.total_price:.2f}', o.status, o.payment_method, o.delivery_method, o.address, o.comment])
     output.seek(0)
     with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmpfile:
         tmpfile.write(output.read().encode('utf-8'))
         tmpfile_path = tmpfile.name
-    file_name = f"orders_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
+    file_name = f"orders_{datetime.now().strftime(t("date_format"))}.csv"
     await callback.message.answer_document(FSInputFile(tmpfile_path, filename=file_name), caption='Orders export for 30 days (CSV)')
     await callback.answer()

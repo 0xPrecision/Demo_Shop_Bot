@@ -49,10 +49,10 @@ async def show_orders_menu(
     for order in filtered:
         text += t("orders.list.items").format(
             id=order.id,
-            date=order.created_at.strftime("%d.%m.%Y"),
+            date=order.created_at.strftime(t("date_format")),
             status=order.status,
             total=format_price(order.total_price),
-            currency="₽",
+            currency=t("currency"),
         )
     text += t("orders.list.footer").format(separator="-" * 19)
 
@@ -70,10 +70,10 @@ async def get_order_details(order_id: int, t, **_) -> Dict:
         return {'text': t('admin_orders.messages.zakaz-ne-najden'), 'keyboard': order_details_keyboard(t, order_id)}
     order_items = await get_order_items(order)
     total = sum([item.quantity * float(item.product.price) for item in order_items])
-    items_text = '\n'.join([f'• {format_product_name(item.product.name)} — {item.quantity} x {format_price(item.product.price)} ₽ = {format_price(item.quantity * float(item.product.price))} ₽' for item in order_items])
+    items_text = '\n'.join([f'• {format_product_name(item.product.name)} — {item.quantity} x {format_price(item.product.price)} {t("currency")} = {format_price(item.quantity * float(item.product.price))} {t("currency")}' for item in order_items])
 
     text = t('user_orders_utils.misc.b-zakaz-b').format(id=order.id,
-                                                        created_at=order.created_at.strftime('%d.%m.%Y %H:%M'),
+                                                        created_at=order.created_at.strftime(t("date_format")),
                                                         status=order.status,
                                                         items_text=items_text,
                                                         payment=order.payment_method or '-',
@@ -81,7 +81,7 @@ async def get_order_details(order_id: int, t, **_) -> Dict:
                                                         address=order.address or '-',
                                                         items=items_text,
                                                         total=format_price(total),
-                                                        currency="₽")
+                                                        currency=t("currency"))
 
 
     return {'text': text, 'keyboard': order_details_keyboard(t, order.id)}
@@ -117,12 +117,12 @@ async def show_order_summary(message_or_callback, state: FSMContext, t) -> None:
             name=name,
             qty=qty,
             line_total=format_price(pr_sum),
-            currency="₽"
+            currency=t("currency")
         )
 
     summary += t("checkout.summary.total_block").format(
         total=format_price(total),
-        currency="₽"
+        currency=t("currency")
     )
 
     summary += t("checkout.summary.hint")

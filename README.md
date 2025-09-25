@@ -16,11 +16,11 @@
 <table align="center">
   <tr>
     <td align="center" width="550">
-      <img src="assets/user_demo.gif" width="400" alt="Order placement"/><br/>
+      <img src="assets/admin.gif" width="400" alt="Order placement"/><br/>
       <h4> <b>User panel demo. Order placement</b> </h4>
     </td>
     <td align="center" width="550">
-      <img src="assets/admin_demo.gif" width="400" alt="Admin panel"/><br/>
+      <img src="assets/user.gif" width="400" alt="Admin panel"/><br/>
       <h4>Admin panel demo. Changing order status</h4>
     </td>
   </tr>

@@ -54,8 +54,12 @@ def products_keyboard(products: list[dict], category: str, page: int, total_page
     rows = [
         [
             InlineKeyboardButton(
-                text=f"{format_product_name(product.name, 35)} — {format_price(product.price)} ₽",
+                text=f"{format_product_name(product.name, 70)}",
                 callback_data=f"product_{product.id}_catalog_{category}_{page}",
+            ),
+            InlineKeyboardButton(
+                text=f"{format_price(product.price)} {t("currency")}",
+                callback_data="noop",
             ),
             InlineKeyboardButton(
                 text=t("user_catalog_keyboards.buttons.v-korzinu"),
