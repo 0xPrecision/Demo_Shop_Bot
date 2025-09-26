@@ -1,13 +1,16 @@
 # i18n/translations.py
 from __future__ import annotations
+
 import json
 from pathlib import Path
-from typing import Callable, Dict, Any, Optional
+from typing import Any, Callable, Dict, Optional
+
 
 class _SafeDict(dict):
     def __missing__(self, key):
         # оставляем нетронутым пропущенный плейсхолдер, чтобы не падать
         return "{" + key + "}"
+
 
 def _russian_plural(n: int) -> str:
     n = abs(int(n))
@@ -21,8 +24,10 @@ def _russian_plural(n: int) -> str:
         return "few"
     return "many"
 
+
 def _english_plural(n: int) -> str:
     return "one" if abs(int(n)) == 1 else "other"
+
 
 class Translator:
     def __init__(
@@ -69,14 +74,18 @@ class Translator:
 
     def for_locale(self, locale: Optional[str]) -> Callable[[str], str]:
         loc = self.normalize(locale)
+
         def tr(key: str, **vars: Any) -> str:
             return self.translate(key, loc, **vars)
+
         return tr
 
     def for_locale_plural(self, locale: Optional[str]) -> Callable[[str, int], str]:
         loc = self.normalize(locale)
+
         def trn(key: str, count: int, **vars: Any) -> str:
             return self.translate_plural(key, count, loc, **vars)
+
         return trn
 
     def translate(self, key: str, locale: Optional[str], **vars: Any) -> str:
@@ -87,20 +96,32 @@ class Translator:
             return f"[{key}]"
         if isinstance(val, dict):
             # если по ключу лежит объект для плюрализации — берём "other"
-            val = val.get("other") or val.get("many") or val.get("one") or next(iter(val.values()))
+            val = (
+                val.get("other")
+                or val.get("many")
+                or val.get("one")
+                or next(iter(val.values()))
+            )
         try:
             return str(val).format_map(_SafeDict(vars))
         except Exception:
             return str(val)
 
-    def translate_plural(self, key: str, count: int, locale: Optional[str], **vars: Any) -> str:
+    def translate_plural(
+        self, key: str, count: int, locale: Optional[str], **vars: Any
+    ) -> str:
         loc = self.normalize(locale)
         bundle = self._resolve(key, loc)
         if not isinstance(bundle, dict):
             # если разработчик забыл оформить plural-ключ, отдадим обычный translate
             return self.translate(key, loc, **vars)
         form = self._plural_form(loc, count)
-        val = bundle.get(form) or bundle.get("other") or bundle.get("many") or bundle.get("one")
+        val = (
+            bundle.get(form)
+            or bundle.get("other")
+            or bundle.get("many")
+            or bundle.get("one")
+        )
         try:
             return str(val).format_map(_SafeDict({"count": count, **vars}))
         except Exception:

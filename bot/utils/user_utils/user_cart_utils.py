@@ -1,21 +1,27 @@
-from typing import List, Tuple
 from decimal import Decimal
+from typing import List, Tuple
+
 from aiogram.types import InlineKeyboardMarkup
-from database.models import Cart, Product
-from bot.utils.common_utils import paginate, format_price
-from bot.keyboards.user.user_common_keyboards import cart_back_menu
+
 from bot.keyboards.user.user_cart_keyboards import cart_keyboard
+from bot.keyboards.user.user_common_keyboards import cart_back_menu
+from bot.utils.common_utils import format_price, paginate
+from database.models import Cart, Product
+
 PAGE_SIZE = 5
 
-async def build_cart_view(cart_items: List[Cart], t, page: int=0, **_) -> Tuple[str, InlineKeyboardMarkup]:
+
+async def build_cart_view(
+    cart_items: List[Cart], t, page: int = 0, **_
+) -> Tuple[str, InlineKeyboardMarkup]:
     """
     Builds text and a keyboard for displaying the user's cart with pagination.
     Shows the full cart in the text, but only products for the current page in inline buttons.
-    
+
     :param cart_items: List of the user's Cart objects.
     :param page: Page number (from 0).
     :return: Tuple (message text, inline keyboard).
-	"""
+    """
     if cart_items:
         product_ids = [item.product_id for item in cart_items]
         products = await Product.filter(id__in=product_ids).all()
@@ -32,7 +38,7 @@ async def build_cart_view(cart_items: List[Cart], t, page: int=0, **_) -> Tuple[
         total_pages = max(1, (total_items + PAGE_SIZE - 1) // PAGE_SIZE)
         if page > 0 and page >= total_pages:
             page = total_pages - 1
-        text = t('user_cart_utils.misc.b-vasha-korzina-b')
+        text = t("user_cart_utils.misc.b-vasha-korzina-b")
         for item, product in cart_pairs:
             product_price = product.price * item.quantity
             text += t("cart.item_line").format(
@@ -40,11 +46,13 @@ async def build_cart_view(cart_items: List[Cart], t, page: int=0, **_) -> Tuple[
                 qty=item.quantity,
                 unit_price=format_price(product.price),
                 total=format_price(product_price),
-                currency=t("currency")
+                currency=t("currency"),
             )
-        text += t("cart.total").format(total=format_price(total), currency=t("currency"))
+        text += t("cart.total").format(
+            total=format_price(total), currency=t("currency")
+        )
         page_products, total_pages, _ = paginate(cart_pairs, page, PAGE_SIZE)
         keyboard = cart_keyboard(page_products, page, total_pages, t)
         return text, keyboard
     else:
-        return t('user_cart.messages.vasha-korzina-pusta'), cart_back_menu(t)
+        return t("user_cart.messages.vasha-korzina-pusta"), cart_back_menu(t)

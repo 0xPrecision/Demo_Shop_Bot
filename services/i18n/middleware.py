@@ -40,10 +40,14 @@
 
 
 from __future__ import annotations
+
 from typing import Any, Awaitable, Callable, Dict, Optional
+
 from aiogram import BaseMiddleware
 from aiogram.types import Update
+
 from services.i18n.translations import Translator
+
 
 def _tg_lang(update: Update) -> Optional[str]:
     if update.message and update.message.from_user:
@@ -58,13 +62,18 @@ def _tg_lang(update: Update) -> Optional[str]:
         return update.chat_member.from_user.language_code
     return None
 
+
 class LocaleMiddleware(BaseMiddleware):
     def __init__(self, translator: Translator, locale_repo):
         self.tr = translator
         self.repo = locale_repo  # services.LocaleRepo
 
-    async def __call__(self, handler: Callable[[Any, Dict[str, Any]], Awaitable[Any]],
-                       event: Update, data: Dict[str, Any]) -> Any:
+    async def __call__(
+        self,
+        handler: Callable[[Any, Dict[str, Any]], Awaitable[Any]],
+        event: Update,
+        data: Dict[str, Any],
+    ) -> Any:
         tg = _tg_lang(event)
         uid = None
         if event.message and event.message.from_user:
@@ -88,6 +97,3 @@ class LocaleMiddleware(BaseMiddleware):
         data["translator"] = self.tr
         data["locale_repo"] = self.repo
         return await handler(event, data)
-
-
-

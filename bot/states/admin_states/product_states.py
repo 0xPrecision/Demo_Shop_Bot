@@ -1,4 +1,5 @@
-from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.state import State, StatesGroup
+
 
 class AddProductStates(StatesGroup):
     waiting_name = State()
@@ -9,11 +10,13 @@ class AddProductStates(StatesGroup):
     waiting_category = State()
     confirming = State()
 
+
 class EditProductStates(StatesGroup):
     choosing_field = State()
     editing_field = State()
     editing_category = State()
     confirming = State()
+
 
 class ProductSearchStates(StatesGroup):
     waiting_query = State()

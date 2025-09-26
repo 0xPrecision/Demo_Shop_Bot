@@ -135,6 +135,7 @@ Demo_Shop_Bot/
 │        │     ├── user_profile_utils.py
 │        │     └── validators.py
 │        ├── common_utils.py
+│        ├── logger.py
 │        └── constants.py
 ├── config_data/
 │   ├── __init__.py
@@ -142,9 +143,11 @@ Demo_Shop_Bot/
 │   └── env.py
 ├── database/
 │   ├── __init__.py
+│   ├── config.py
 │   ├── crud.py
-│   ├── __init___db.py
+│   ├── init_db.py
 │   └── models.py
+├── migrations/
 ├── services/
 │   ├── i18n/
 │   │    ├── __init__.py

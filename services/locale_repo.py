@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 from typing import Optional
-from database.models import UserLocale, User
+
+from database.models import User, UserLocale
+
 
 class LocaleRepo:
     @staticmethod
@@ -12,7 +15,4 @@ class LocaleRepo:
     async def set(user_id: int, locale: str) -> None:
         # гарантируем наличие User (если регистрируешь пользователей отдельно — можешь убрать это)
         await User.get_or_create(id=user_id, defaults={"full_name": "", "address": ""})
-        await UserLocale.update_or_create(
-            defaults={"locale": locale},
-            user_id=user_id
-        )
+        await UserLocale.update_or_create(defaults={"locale": locale}, user_id=user_id)

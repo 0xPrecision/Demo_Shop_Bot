@@ -1,4 +1,8 @@
 aiogram
 python-dotenv
 tortoise-orm
+aerich
 redis
+ruff
+black
+isort
