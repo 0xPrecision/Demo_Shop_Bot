@@ -167,7 +167,9 @@ Demo_Shop_Bot/
 ├── .gitignore
 ├── dump.rdb
 ├── LICENSE
+├── logging_config.py
 ├── main.py
+├── pyproject.toml
 ├── README.md
 ├── requirements.txt
 └── shop.db
