@@ -1,17 +1,18 @@
-<div align="center">
+![Python](https://img.shields.io/badge/python-3.13%2B-blue?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-active-success)
+![Platform](https://img.shields.io/badge/platform-Telegram-blue?logo=telegram&logoColor=white)
+![Code style: Black](https://img.shields.io/badge/code%20style-black-000000?logo=python&logoColor=white)
+![Imports: isort](https://img.shields.io/badge/imports-isort-ef8336?logo=python&logoColor=white)
+![Linter: Ruff](https://img.shields.io/badge/linter-ruff-e07a5f?logo=ruff&logoColor=white)
 
-# Demo Shop Bot
+# 🚀️ Demo Shop Bot
 
-![Python](https://img.shields.io/badge/Python-3.13+-blue.svg) ![License](https://img.shields.io/badge/License-MIT-green.svg) ![Status](https://img.shields.io/badge/Status-Active-success.svg)
+## A professional Telegram bot template for e-commerce
+### Launch a fully functional online shop in just a few hours — fully modular, scalable, and ready for integration with payments, CRM, and subscriptions
 
-
-### A professional Telegram bot template for e-commerce.
-#### Launch a fully functional online shop in just a few hours — fully modular, scalable, and ready for integration with payments, CRM, and subscriptions.
-
-</div>
 
 ---
-
 
 <table align="center">
   <tr>
@@ -183,7 +184,8 @@ Demo_Shop_Bot/
 - Catalog with categories, product pagination and filtering  
 - Cart: add, remove, clear, and view items in one place  
 - Automatic user profile creation after the first purchase  
-- Autofill contact details from profile when placing an order  
+- Autofill contact details from profile when placing an order
+- Multilingual support out of the box (i18n with JSON dictionaries + middleware)
 - Order placement with validation and FSM (step-by-step scenarios, all temporary states stored in Redis)  
 - CRUD user profile with edit mode  
 - Navigation and return to menu/catalog from any step  
@@ -223,7 +225,8 @@ Demo_Shop_Bot/
 
 - Modify categories, styling, and product structure via the admin panel or the database.  
 - For integrating online payments, CRM, and subscriptions use the modular architecture (see README and code comments).  
-- Documentation and docstring comments will help quickly adapt the project for a client.  
+- Documentation and docstring comments will help quickly adapt the project for a client.
+- The project is fully ready for internationalization (i18n). You can extend translations by editing JSON dictionaries in /services/locales.
 
 ---
 
