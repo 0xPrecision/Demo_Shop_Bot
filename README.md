@@ -1,16 +1,20 @@
-![Python](https://img.shields.io/badge/python-3.13%2B-blue?logo=python&logoColor=white)
+# 🤖 Demo Shop Bot
+
+![Python](https://img.shields.io/badge/python-3.13+-blue?logo=python)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-active-success)
-![Platform](https://img.shields.io/badge/platform-Telegram-blue?logo=telegram&logoColor=white)
-![Code style: Black](https://img.shields.io/badge/code%20style-black-000000?logo=python&logoColor=white)
-![Imports: isort](https://img.shields.io/badge/imports-isort-ef8336?logo=python&logoColor=white)
-![Linter: Ruff](https://img.shields.io/badge/linter-ruff-e07a5f?logo=ruff&logoColor=white)
+![Platform](https://img.shields.io/badge/platform-Telegram-blue?logo=telegram)
 
-# 🚀️ Demo Shop Bot
+**Dev tools:**  
+![Black](https://img.shields.io/badge/code%20style-black-000000) 
+![isort](https://img.shields.io/badge/imports-isort-orange) 
+![Ruff](https://img.shields.io/badge/linter-ruff-red)
 
-## A professional Telegram bot template for e-commerce
-### Launch a fully functional online shop in just a few hours — fully modular, scalable, and ready for integration with payments, CRM, and subscriptions
+---
 
+### A professional Telegram bot template for e-commerce
+
+Launch a fully functional online shop in just a few hours — fully modular, scalable, multilingual (i18n), and ready for integration with payments, CRM, and subscriptions.
 
 ---
 
