@@ -8,8 +8,8 @@
 
 # 🚀️ Demo Shop Bot
 
-## A professional Telegram bot template for e-commerce
-### Launch a fully functional online shop in just a few hours — fully modular, scalable, and ready for integration with payments, CRM, and subscriptions
+<h2> A professional Telegram bot template for e-commerce</h2>>
+<h3> Launch a fully functional online shop in just a few hours — fully modular, scalable, and ready for integration with payments, CRM, and subscriptions</h3>>
 
 
 ---
