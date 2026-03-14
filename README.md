@@ -7,7 +7,8 @@
 ![Status](https://img.shields.io/badge/status-active-success)
 ![Platform](https://img.shields.io/badge/platform-Telegram-blue?logo=telegram)
 
-**Инструменты разработки:**  
+**Инструменты разработки:**
+
 ![Black](https://img.shields.io/badge/code%20style-black-000000) 
 ![isort](https://img.shields.io/badge/imports-isort-orange) 
 ![Ruff](https://img.shields.io/badge/linter-ruff-red)
