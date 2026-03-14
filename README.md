@@ -5,65 +5,66 @@
 ![Status](https://img.shields.io/badge/status-active-success)
 ![Platform](https://img.shields.io/badge/platform-Telegram-blue?logo=telegram)
 
-**Dev tools:**  
+**Инструменты разработки:**  
 ![Black](https://img.shields.io/badge/code%20style-black-000000) 
 ![isort](https://img.shields.io/badge/imports-isort-orange) 
 ![Ruff](https://img.shields.io/badge/linter-ruff-red)
 
 ---
 
-### A professional Telegram bot template for e-commerce
+### Шаблон интернет-магазина на базе Telegram-бота
 
-Launch a fully functional online shop in just a few hours — fully modular, scalable, multilingual (i18n), and ready for integration with payments, CRM, and subscriptions.
+Это готовый фундамент для e-commerce, который можно адаптировать под свой проект без сборки всего с нуля.
+Он построен на модульной архитектуре, поддерживает несколько языков (i18n) и легко расширяется интеграциями с оплатой, CRM и подписками.
 
 ---
 
 <table align="center">
   <tr>
     <td align="center" width="550">
-      <img src="assets/admin.gif" width="400" alt="Order placement"/><br/>
-      <h4> <b>User panel demo. Order placement</b> </h4>
+      <img src="assets/admin.gif" width="400" alt="Оформление заказа"/><br/>
+      <h4> <b>Демонстрация панели пользователя. Оформление заказа</b> </h4>
     </td>
     <td align="center" width="550">
-      <img src="assets/user.gif" width="400" alt="Admin panel"/><br/>
-      <h4>Admin panel demo. Changing order status</h4>
+      <img src="assets/user.gif" width="400" alt="Панель администратора"/><br/>
+      <h4>Демонстрация панели администратора. Изменение статуса заказа</h4>
     </td>
   </tr>
 </table>
 
 ---
 
-## Project Description
+## Описание проекта
 
-##### **Demo Shop Bot** is a professional online store template based on a Telegram bot, designed for small businesses.  
-Built with Python using aiogram 3+, FSM, and SQLite (Tortoise ORM).  
-It allows you to launch a fully functional e-commerce project in just a few hours, easily adapts to any client's needs, and scales up to a CRM system or online acquiring.  
-Ready for integration with payment services and further feature development.
-
----
-
-
-## Features at a Glance
-
-- 🛍 **Catalog & cart** — categories, pagination, inline menus, and dynamic updates  
-- 👤 **User profile** — CRUD with edit mode, auto-creation after first purchase  
-- 📦 **Order processing** — validation + FSM (all temporary states stored in Redis)  
-- ⚡ **Admin panel** — search, edit, view users/orders, CSV export, statistics  
-- 🔄 **Reusable utilities** — validation, alerts, navigation, message cleanup  
-- 🔒 **Error handling & UX** — back/menu at every step, clear notifications  
-- 🗂 **Database** — SQLite + Tortoise ORM with universal CRUD functions  
-- 🧩 **Modular architecture** — clean separation of handlers, states, keyboards  
-- 🚀 **Scalability** — extend with CRM, online payments, subscriptions, analytics  
-- 💾 **Backups** — automatic Redis (dump.rdb) and SQLite backups for data safety  
-
+##### **Demo Shop Bot** — это готовая база для запуска интернет-магазина в Telegram с возможностью адаптации под задачи малого бизнеса.
+Создан на Python с использованием aiogram 3+, FSM и SQLite (Tortoise ORM).  
+Позволяет запустить полностью рабочий e-commerce проект всего за несколько часов, легко адаптируется под задачи любого клиента и масштабируется до CRM-системы или онлайн-эквайринга.  
+Готов к интеграции с платёжными сервисами и дальнейшему развитию функциональности.
 
 ---
 
 
-## Project Structure
+## Ключевые возможности
+
+- 🛍 **Каталог и корзина** — категории, пагинация, inline-меню и динамические обновления  
+- 👤 **Профиль пользователя** — CRUD с режимом редактирования, автоматическое создание профиля после первой покупки  
+- 📦 **Обработка заказов** — валидация + FSM (все временные состояния хранятся в Redis)  
+- ⚡ **Админ-панель** — поиск, редактирование, просмотр пользователей/заказов, экспорт CSV, статистика  
+- 🔄 **Переиспользуемые утилиты** — валидация, уведомления, навигация, очистка сообщений  
+- 🔒 **Обработка ошибок и UX** — кнопки назад/в главное меню на каждом шаге, понятные уведомления  
+- 🗂 **База данных** — SQLite + Tortoise ORM с универсальными CRUD-функциями  
+- 🧩 **Модульная архитектура** — чёткое разделение handlers, states, keyboards  
+- 🚀 **Масштабируемость** — расширение до CRM, онлайн-платежей, подписок, аналитики  
+- 💾 **Резервные копии** — автоматические бэкапы Redis (dump.rdb) и SQLite для хранения данных  
+
+
+---
+
+
+## Структура проекта
 
 <details>
-<summary>Expand project tree</summary>
+<summary>Развернуть дерево проекта</summary>
 
 ```
 Demo_Shop_Bot/
@@ -183,82 +184,81 @@ Demo_Shop_Bot/
 
 ---
 
-## Main Features
+## Основные возможности
 
-- Catalog with categories, product pagination and filtering  
-- Cart: add, remove, clear, and view items in one place  
-- Automatic user profile creation after the first purchase  
-- Autofill contact details from profile when placing an order
-- Multilingual support out of the box (i18n with JSON dictionaries + middleware)
-- Order placement with validation and FSM (step-by-step scenarios, all temporary states stored in Redis)  
-- CRUD user profile with edit mode  
-- Navigation and return to menu/catalog from any step  
-- Cleanup of old messages for a clean UX  
-- Admin panel: view categories, products and orders, search, edit, statistics, export to CSV  
-- Flexible architecture for extension into CRM/ERP and online payment integration  
-- **Automatic backup of Redis data (dump.rdb) and SQLite database to preserve orders and profiles**
+- Каталог с категориями, пагинацией товаров и фильтрацией  
+- Корзина: добавление, удаление, очистка и просмотр товаров в одном месте  
+- Автоматическое создание профиля пользователя после первой покупки  
+- Автозаполнение контактных данных из профиля при оформлении заказа
+- Встроенная многоязычность (i18n на базе JSON-словарей + middleware)
+- Оформление заказа с валидацией и FSM (пошаговые сценарии, все временные состояния хранятся в Redis)  
+- CRUD-профиль пользователя с режимом редактирования  
+- Навигация и возврат в меню/каталог с любого шага  
+- Очистка старых сообщений для аккуратного UX  
+- Админ-панель: просмотр категорий, товаров и заказов, поиск, редактирование, статистика, экспорт в CSV  
+- Гибкая архитектура для расширения до CRM/ERP и интеграции онлайн-платежей  
+- **Автоматическое резервное копирование данных Redis (dump.rdb) и базы SQLite для сохранения заказов и профилей**
 
 ---
 
-## Prerequisites
+## Что понадобится
 
 - Python 3.13+  
-- Redis 6+ (default at `localhost:6379`)  
-- SQLite (included by default)
+- Redis 6+ (по умолчанию `localhost:6379`)  
+- SQLite (входит по умолчанию)
 
 ---
 
-## Run & Usage
+## Запуск и использование
 
-1. Clone the repository and install dependencies:
+1. Клонируйте репозиторий и установите зависимости:
     ```bash
     pip install -r requirements.txt
     ```
-2. Configure parameters in `.env` (bot token, database).  
-3. Make sure Redis is running (default: `localhost:6379`).  
-4. Initialize the database (created automatically on first run).  
-5. Start `main.py`:
+2. Настройте параметры в `.env` (токен бота, база данных).  
+3. Убедитесь, что Redis запущен (по умолчанию: `localhost:6379`).  
+4. Инициализируйте базу данных (она создаётся автоматически при первом запуске).  
+5. Запустите `main.py`:
     ```bash
     python main.py
     ```
-6. Control the bot via Telegram using menus and commands.
+6. Управляйте ботом через Telegram с помощью меню и команд.
 
 ---
 
-## Customization Guidelines
+## Рекомендации по кастомизации
 
-- Modify categories, styling, and product structure via the admin panel or the database.  
-- For integrating online payments, CRM, and subscriptions use the modular architecture (see README and code comments).  
-- Documentation and docstring comments will help quickly adapt the project for a client.
-- The project is fully ready for internationalization (i18n). You can extend translations by editing JSON dictionaries in /services/locales.
-
----
-
-## Scaling & Monetization
-
-- Perfect foundation for freelancers and agencies delivering Telegram-based e-commerce solutions.
-- The solution is ready for resale and customization for small and medium-sized businesses.  
-- The template can be used as a foundation for developing new e-commerce bots, extended for agency sales, support, and store automation.  
+- Изменяйте категории, оформление и структуру товаров через админ-панель или базу данных.  
+- Для интеграции онлайн-платежей, CRM и подписок используйте модульную архитектуру (см. README и комментарии в коде).  
+- Документация и комментарии в docstring помогут быстро адаптировать проект под клиента.
+- Проект полностью готов к интернационализации (i18n). Вы можете расширять переводы, редактируя JSON-словари в /services/locales.
 
 ---
 
-## Roadmap
+## Масштабирование и монетизация
 
-- [ ] Integration with payment providers
-
-- [ ] Docker setup for quick deployment
-
-- [ ] Unit and integration tests
-
-
-## License
-
-This project is distributed under the standard [LICENSE](LICENSE).
+- Отличная основа для фрилансеров и агентств, которые делают Telegram-решения для e-commerce.
+- Решение готово к перепродаже и кастомизации для малого и среднего бизнеса.  
+- Шаблон можно использовать как базу для разработки новых e-commerce ботов, расширения агентских продаж, поддержки и автоматизации магазинов.  
 
 ---
 
-## Contacts
+## Дорожная карта
 
+- [ ] Интеграция с платёжными провайдерами
+
+- [ ] Настройка Docker для быстрого развёртывания
+
+- [ ] Unit- и integration-тесты
+
+
+## Лицензия
+
+Этот проект распространяется по стандартной [LICENSE](LICENSE).
+
+---
+
+## Контакты
 
 - Telegram: [@OxPrecision](https://t.me/OxPrecision)
 - Email: wrkfrvr@gmail.com
@@ -266,6 +266,3 @@ This project is distributed under the standard [LICENSE](LICENSE).
 ---
 
 © 2025 Nikita OxPrecision. All rights reserved.
-
-
-
